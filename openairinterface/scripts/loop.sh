@@ -20,8 +20,7 @@ ITER=500
 for i in $(seq 0 "$ITER"); do
     #for j in $(seq -f "%05g" "$LOW" "$HIGH"); do
     for j in $(seq "$LOW" "$HIGH"); do
-        echo "Rogue UE with IMSI $IMSI"
-        bin/nr-uesoftmodem --rfsim --rfsimulator.serveraddr 192.168.80.129 -r 106 --numerology 1 --band 78 -C 3619200000 --ue-fo-compensation --sa -E --uicc0.imsi 001010000000001 1>/dev/null & # 2>&1
+        bin/nr-uesoftmodem --rfsim --rfsimulator.serveraddr 192.168.80.129 -r 106 --numerology 1 --band 78 -C 3619200000 --ue-fo-compensation -E --uicc0.imsi 001010000000001 1>/dev/null & # --sa 2>&1
     done
     echo "Iteration $i done. Waiting..."
     sleep "$WAIT_SEC"
