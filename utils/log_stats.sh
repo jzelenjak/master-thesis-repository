@@ -82,6 +82,8 @@ done
 echo "Container,Time,CPUPerc,MemPerc,MemUsage" | tee "$OUTPUT_FILE" | tr ',' '\t' | colored "$RED"
 
 # Keep fetching the stats until terminated with Ctrl+C
+# The idea of adding the date is taken from:
+#   https://medium.com/@cedricmillet/generate-resource-usage-graphs-of-any-running-docker-container-memory-cpu-563fcbbdab5c
 i=0
 LOOP=true
 while $LOOP; do
