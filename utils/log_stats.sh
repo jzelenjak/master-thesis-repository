@@ -15,6 +15,7 @@ function usage() {
     echo -e "Display a live stream of container(s) CPU and memory usage statistics\n"
     echo -e "Options:"
     echo -e "\t-o file\t\tWrite the output to a file (default writes only to stdout)"
+    echo -e "\t-u\t\tUse UTC time when generating logs (default uses local time zone)"
     echo -e "\t-h\t\tDisplay this message and exit"
 }
 
@@ -41,10 +42,13 @@ trap cleanup INT
 # Parse the provided options (if any)
 # (https://web.archive.org/web/20200507131743/https:/wiki.bash-hackers.org/howto/getopts_tutorial)
 # (https://stackoverflow.com/questions/16483119/an-example-of-how-to-use-getopts-in-bash)
-while getopts ":ho:" opt; do
+while getopts ":o:uh" opt; do
     case "$opt" in
         o)
             OUTPUT_FILE="${OPTARG}"
+            ;;
+        u)
+            export TZ="UTC"
             ;;
         h)
             usage
