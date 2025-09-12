@@ -1,3 +1,5 @@
+# Note: This Docker Compose file has been taken from the official free5gc-compose repository (https://github.com/free5gc/free5gc-compose)
+#  and has been adapted for the attack (e.g. to use a local image for the UE and the gNB, and to limit the CPU and memory resources).
 services:
   free5gc-upf:
     container_name: upf
@@ -54,7 +56,7 @@ services:
       resources:
         limits:
           cpus: '1.0'
-          memory: 4G
+          memory: 1G
     expose:
       - "8000"
     volumes:
@@ -285,17 +287,24 @@ services:
 
   gnodeb:
     container_name: gnodeb
-    image: free5gc/ueransim:latest
-    command: ./nr-gnb -c ./config/gnbcfg.yaml
+    # We use our own image with the modified source code
+    # For the normal behaviour, use the following (official) image instead
+    # image: free5gc/ueransim:latest
+    image: rogue-ueransim
+    # We create a dummy container, so that we can start the gNB ourselves
+    # To start the gNB on container creation, use the command below instead
+    # command: ./nr-gnb -c ./config/gnbcfg.yaml
+    command: tail -f
     # We limit the CPU and memory resources of the gNB container for the attack
     deploy:
       resources:
         limits:
-          cpus: '4.0'
-          memory: 4G
+          cpus: '2.0'
+          memory: 1G
     volumes:
       - ./config/gnbcfg.yaml:/ueransim/config/gnbcfg.yaml
       - ./config/uecfg.yaml:/ueransim/config/uecfg.yaml
+      - ./output_logs:/ueransim/output_logs  # for the logs with the UE connections
     cap_add:
       - NET_ADMIN
     devices:
@@ -313,20 +322,41 @@ services:
     # We use our own image with the modified source code
     # For the normal behaviour, use the following (official) image instead
     # image: free5gc/ueransim:latest
-    image: rogue-ue-ueransim
+    image: rogue-ueransim
+    # We create a dummy container, so that we can launch the attack scripts from it
+    # To start the UE on container creation, use the command below instead
+    # (This probably does not make sense for the attacker UE)
+    # command: ./nr-ue -c ./config/uecfg.yaml
+    command: tail -f
     # We limit the CPU and memory resources of the UE container for the attack
     deploy:
       resources:
         limits:
           cpus: '15.0'
-          memory: 15G
-    # We make the UE a dummy container, so that we can launch the attacker scripts from it
-    # For the normal behaviour, use the command below instead
+          memory: 4G
+    volumes:
+      - ./config/uecfg.yaml:/ueransim/config/uecfg.yaml
+      - ../scripts:/ueransim/scripts
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - "/dev/net/tun"
+    networks:
+      privnet:
+        aliases:
+          - ue.free5gc.org
+    depends_on:
+      - gnodeb
+  
+  victim_ue:
+    container_name: victim_ue
+    image: free5gc/ueransim:latest
+    # We create a dummy container, so that we can start the victim UE ourselves
+    # To start the victim UE on container creation, use the command below instead
     # command: ./nr-ue -c ./config/uecfg.yaml
     command: tail -f
     volumes:
       - ./config/uecfg.yaml:/ueransim/config/uecfg.yaml
-      - ../scripts:/ueransim/scripts
     cap_add:
       - NET_ADMIN
     devices:

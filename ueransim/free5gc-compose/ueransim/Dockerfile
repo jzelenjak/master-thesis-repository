@@ -6,7 +6,7 @@ LABEL maintainer="Free5GC <support@free5gc.org>"
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-ARG TARGET_ARCH=x86_64 
+ARG TARGET_ARCH=x86_64
 # TARGET_ARCH support : x86_64, aarch64(arm64)
 
 # Make sure to have the UERANSIM repository cloned in the free5gc/ directory of this repository
@@ -21,11 +21,12 @@ RUN apt-get update \
     && mkdir cmake-files \
     && ./cmake_installer.sh --skip-license --prefix=cmake-files \
     && cp cmake-files/bin/* /bin/ \
-    && cp -r cmake-files/share/cmake-3.22/ /usr/share/ \
-    # Use the local UERANSIM code
-    # && git clone -b master -j `nproc` https://github.com/aligungr/UERANSIM \
-    && cd ./UERANSIM \
-    && make
+    && cp -r cmake-files/share/cmake-3.22/ /usr/share/
+
+# Compile the local UERANSIM code
+# To clone the repository, run: git clone -b master -j `nproc` https://github.com/aligungr/UERANSIM
+RUN cd ./UERANSIM \
+   && make
 
 FROM ubuntu
 
@@ -35,6 +36,11 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update \
     && apt-get install libsctp-dev lksctp-tools iproute2 iputils-ping procps psmisc -y \
     && apt-get clean
+
+# Install some tools for debugging
+RUN apt-get update \
+    && apt-get install gdb curl wget xz-utils vim valgrind -y \
+    && curl -qsL 'https://install.pwndbg.re' | sh -s -- -t pwndbg-gdb
 
 WORKDIR /ueransim
 

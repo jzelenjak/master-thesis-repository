@@ -4,4 +4,6 @@
 *.jpg
 *.svg
 
+ueransim/free5gc-compose/cert/*_*.pem
+
 *UERANSIM/
