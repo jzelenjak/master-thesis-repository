@@ -21,7 +21,7 @@ RUN apt-get update \
     && mkdir cmake-files \
     && ./cmake_installer.sh --skip-license --prefix=cmake-files \
     && cp cmake-files/bin/* /bin/ \
-    && cp -r cmake-files/share/cmake-3.22/ /usr/share/
+    && cp -r cmake-files/share/cmake-*/ /usr/share/
 
 # Compile the local UERANSIM code
 # To clone the repository, run: git clone -b master -j `nproc` https://github.com/aligungr/UERANSIM

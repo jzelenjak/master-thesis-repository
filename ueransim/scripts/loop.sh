@@ -9,7 +9,11 @@ IFS=$'\n\t'
 
 umask 077
 
+FLOODING_RATE=130
+
 while true; do
-# for i in $(seq 1 500); do
-    ./nr-ue -c config/uecfg.yaml &
+	for i in $(seq 1 "$FLOODING_RATE"); do
+	    ./nr-ue -c config/uecfg.yaml &
+	done
+	sleep 1
 done

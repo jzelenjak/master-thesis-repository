@@ -10,6 +10,7 @@ import matplotlib.dates as md
 import matplotlib.pyplot as plt
 
 # Hardcode the number of CPU cores allocated for the UE container (for Y-axis scaling)
+# (This number cannot be obtained from the docker stats output, so we specify it here)
 CPU_CORES_UE = 15.0
 # More formal names for the entities corresponding to the containers
 CONTAINER_NAMES = {"gnodeb": "gNB", "gnodeb-du": "gNB-DU", "gnodeb-cu": "gNB-CU", "amf": "AMF", "ue": "UE"}
@@ -38,6 +39,10 @@ def parse_mem_usage(s: str, unit: str = "GiB") -> float:
         raise ValueError(f"Unsupported prefix: {prefix}")
     return number * prefix_factors[prefix] / prefix_factors[unit]
 
+
+# Print a reminder message about the number of CPU cores allocated to the UE container
+# (It has to be updated in this script if it is changed in the Docker Compose file)
+print(f"Warning: Using {CPU_CORES_UE} cores for the UE container. Change this value if needed.")
 
 # File format
 #   Container,Time,CPUPerc,MemPerc,MemUsage
@@ -75,9 +80,8 @@ for name in containers.keys():
     # Memory limit can be taken from the stats file
     stats["mem_usage"]["max_value"] = container["mem_limit"] 
     # The UE uses much more than one CPU core, so we have to adjust the Y-axis
-    # TODO: maybe handle this in a better way
     if name == "ue":
-        stats["cpu_perc"]["max_value"] = 100 * CPU_CORES_UE + 100
+        stats["cpu_perc"]["max_value"] = 100 * CPU_CORES_UE + 50  # (add a small offset)
 
     fig, axes = plt.subplots(len(stats))
 

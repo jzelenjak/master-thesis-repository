@@ -9,11 +9,16 @@ IFS=$'\n\t'
 
 umask 077
 
-# Start with the IMSI ..2, because the IMSI ..1 is registered in the network
-NUM=1
+FLOODING_RATE=100
+
+# Start with IMSI ..3, because IMSIs ..1 and ..2 are registered in the network
+NUM=2
 while true ; do
-    NUM=$((NUM + 1))
-    PAD_NUM=$(printf %010d $NUM)
-    IMSI="20893${PAD_NUM}"
-    ./nr-ue -c config/uecfg.yaml --imsi "$IMSI" &
+	for i in range $(seq 1 "$FLOODING_RATE"); do
+	    NUM=$((NUM + 1))
+	    PAD_NUM=$(printf %010d $NUM)
+	    IMSI="20893${PAD_NUM}"
+	    ./nr-ue -c config/uecfg.yaml --imsi "$IMSI" &
+	done
+	sleep 1
 done

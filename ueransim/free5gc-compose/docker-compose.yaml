@@ -356,7 +356,7 @@ services:
     # command: ./nr-ue -c ./config/uecfg.yaml
     command: tail -f
     volumes:
-      - ./config/uecfg.yaml:/ueransim/config/uecfg.yaml
+      - ./config/uecfg2.yaml:/ueransim/config/uecfg.yaml
     cap_add:
       - NET_ADMIN
     devices:
