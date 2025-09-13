@@ -94,18 +94,18 @@ for name in containers.keys():
         # ax.plot(container["time"], container[metric], color=stats[metric]["color"], marker='o')
 
         # Use elapsed seconds on the X-axis (recommended)
-        ax.set_xlabel("Elapsed seconds", fontsize=12)
+        ax.set_xlabel("Elapsed seconds", fontsize=14)
         ax.xaxis.set_ticks(range(0, container["elapsed_seconds"][-1] + 4, 5))
         ax.set_xlim(0, container["elapsed_seconds"][-1] + 1)
         ax.plot(container["elapsed_seconds"], container[metric], color=stats[metric]["color"], marker='o')
 
-        ax.set_ylabel(stats[metric]["unit"], fontsize=12)
+        ax.set_ylabel(stats[metric]["unit"], fontsize=14)
         ax.set_ylim(0, stats[metric]["max_value"])
 
         for tick_label in (ax.get_xticklabels() + ax.get_yticklabels()):
-            tick_label.set_fontsize(12)
+            tick_label.set_fontsize(14)
 
-        ax.set_title(stats[metric]["title"], fontsize=14)
+        ax.set_title(stats[metric]["title"], fontsize=16)
         ax.grid()
 
     # fig.suptitle(f"Resource consumption of the {name} container under the flooding attack over time", fontsize=20)
@@ -114,7 +114,7 @@ for name in containers.keys():
     plt.gcf().set_size_inches(22, 12, forward=True)
     plt.tight_layout()
 
-    plt.savefig(f"stats_{name.replace('-', '_')}.png")
+    plt.savefig(f"stats_{name.replace('-', '_')}.pdf")
     plt.show()
     # https://stackoverflow.com/questions/8213522/when-to-use-cla-clf-or-close-for-clearing-a-plot 
     plt.close()

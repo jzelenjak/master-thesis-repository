@@ -83,7 +83,7 @@ for i, protocol_name in enumerate(protocols.keys()):
     # ax.plot(protocol["time"], protocol["connections"], color=stats[protocol_name]["color"], marker='o')
 
     # Use elapsed seconds on the X-axis (recommended)
-    ax.set_xlabel("Elapsed seconds", fontsize=12)
+    ax.set_xlabel("Elapsed seconds", fontsize=14)
     ax.xaxis.set_ticks(range(0, protocol["elapsed_seconds"][-1] + 4, 5))
     ax.set_xlim(0, protocol["elapsed_seconds"][-1] + 1)
     # While not needed, we can make the line start from 0,0
@@ -94,13 +94,13 @@ for i, protocol_name in enumerate(protocols.keys()):
         protocol["connections"].insert(1, 0)
     ax.plot(protocol["elapsed_seconds"], protocol["connections"], color=stats[protocol_name]["color"], marker='o')
 
-    ax.set_ylabel(stats[protocol_name]["unit"], fontsize=12)
+    ax.set_ylabel(stats[protocol_name]["unit"], fontsize=14)
     ax.set_ylim(bottom=0)
 
     for tick_label in (ax.get_xticklabels() + ax.get_yticklabels()):
-        tick_label.set_fontsize(12)
+        tick_label.set_fontsize(14)
 
-    ax.set_title(stats[protocol_name]["title"], fontsize=14)
+    ax.set_title(stats[protocol_name]["title"], fontsize=16)
     ax.grid()
 
 fig.suptitle(f"Number of UE connections stored in the gNB during the flooding attack over time", fontsize=20)
@@ -108,6 +108,6 @@ fig.suptitle(f"Number of UE connections stored in the gNB during the flooding at
 plt.gcf().set_size_inches(22, 12, forward=True)
 plt.tight_layout()
 
-plt.savefig(f"connections.png")
+plt.savefig(f"connections.pdf")
 plt.show()
 plt.close()
