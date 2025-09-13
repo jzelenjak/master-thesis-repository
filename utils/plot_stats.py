@@ -96,6 +96,7 @@ for name in containers.keys():
         # Use elapsed seconds on the X-axis (recommended)
         ax.set_xlabel("Elapsed seconds", fontsize=12)
         ax.xaxis.set_ticks(range(0, container["elapsed_seconds"][-1] + 4, 5))
+        ax.set_xlim(0, container["elapsed_seconds"][-1] + 1)
         ax.plot(container["elapsed_seconds"], container[metric], color=stats[metric]["color"], marker='o')
 
         ax.set_ylabel(stats[metric]["unit"], fontsize=12)
