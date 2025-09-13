@@ -2,6 +2,6 @@
 
 This directory contains the files and necessary instructions for running [UERANSIM](https://github.com/aligungr/UERANSIM) with [free5GC](https://github.com/free5gc/free5gc) using [free5GC-compose](https://github.com/free5gc/free5gc-compose).
 
-For the actual instructions, refer to the README in the `free5gc-compose` directory.
+For the actual instructions, refer to the [README.md](./free5gc-compose/README.md) in the [free5gc-compose/](./free5gc-compose/) directory.
 
-For a step-by-step guide on how to run the experiments, see [EXPERIMENTS.md](EXPERIMENTS.md) file.
+For a step-by-step guide on how to run the experiments, see [EXPERIMENTS.md](./EXPERIMENTS.md).
