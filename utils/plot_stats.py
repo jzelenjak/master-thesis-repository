@@ -9,9 +9,9 @@ import sys
 import matplotlib.dates as md
 import matplotlib.pyplot as plt
 
-# Hardcode the number of CPU cores allocated for the UE container (for Y-axis scaling)
-# (This number cannot be obtained from the docker stats output, so we specify it here)
-CPU_CORES_UE = 15.0
+# The number of CPU cores allocated to containers cannot be obtained from the docker stats output
+# For this reason, we hardcode it here, so that it can be used for Y-axis scaling
+CPU_CORES = {"ue": 15.0, "gnodeb": 2.0, "amf": 1.0}
 # More formal names for the entities corresponding to the containers
 CONTAINER_NAMES = {"gnodeb": "gNB", "gnodeb-du": "gNB-DU", "gnodeb-cu": "gNB-CU", "amf": "AMF", "ue": "UE"}
 # The file is assumed to be comma-separated (i.e. in the csv format)
@@ -40,9 +40,12 @@ def parse_mem_usage(s: str, unit: str = "GiB") -> float:
     return number * prefix_factors[prefix] / prefix_factors[unit]
 
 
-# Print a reminder message about the number of CPU cores allocated to the UE container
+# Print a reminder message about the number of CPU cores allocated to different containers
 # (It has to be updated in this script if it is changed in the Docker Compose file)
-print(f"Warning: Using {CPU_CORES_UE} cores for the UE container. Change this value if needed.")
+print("Warning: Using the following values for the number allocated CPU cores:")
+for container_name, cpu_cores in CPU_CORES.items():
+    print(f"  {container_name}: {cpu_cores}")
+print(f"Make sure to change these values if you have updated them in the Docker Compose file.")
 
 # File format
 #   Container,Time,CPUPerc,MemPerc,MemUsage
@@ -79,9 +82,8 @@ for name in containers.keys():
     container = containers[name]
     # Memory limit can be taken from the stats file
     stats["mem_usage"]["max_value"] = container["mem_limit"] 
-    # The UE uses much more than one CPU core, so we have to adjust the Y-axis
-    if name == "ue":
-        stats["cpu_perc"]["max_value"] = 100 * CPU_CORES_UE + 50  # (add a small offset)
+    # Specify the number of allocated CPU cores to adjust the Y-axis
+    stats["cpu_perc"]["max_value"] = 100 * CPU_CORES[name]
 
     fig, axes = plt.subplots(len(stats))
 

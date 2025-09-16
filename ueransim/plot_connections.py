@@ -66,9 +66,13 @@ with open(INPUT_FILE, "r") as file:
 
 
 stats = {
-    "rls-udp": { "title": "Active UE RLS UDP connections", "color": "red", "unit": "Number of connections"},
-    "rrc": { "title": "Stored RRC contexts", "color": "blue", "unit": "Number of contexts"},
+    "rls-udp": { "title": "Active UE RLS UDP connections", "color": "red", "unit": "Number of connections", "step_size": 50 },
+    "rrc": { "title": "Stored RRC contexts", "color": "blue", "unit": "Number of contexts", "step_size": 1000 },
 }
+# INFO: These numbers are only needed to make the Y-axis scale consistent for the two experiments
+# Leave it as None if you don't need this adjustment
+# ylims = { "rls-udp": 550, "rrc": 7000 }
+ylims = None
 
 fig, axes = plt.subplots(len(protocols))
 for i, protocol_name in enumerate(protocols.keys()):
@@ -86,7 +90,7 @@ for i, protocol_name in enumerate(protocols.keys()):
     ax.set_xlabel("Elapsed seconds", fontsize=14)
     ax.xaxis.set_ticks(range(0, protocol["elapsed_seconds"][-1] + 4, 5))
     ax.set_xlim(0, protocol["elapsed_seconds"][-1] + 1)
-    # While not needed, we can make the line start from 0,0
+    # While not strictly needed, we can make the line start from 0,0
     if protocol["elapsed_seconds"][0] > 0:
         protocol["elapsed_seconds"].insert(0, protocol["elapsed_seconds"][0] - 1)
         protocol["elapsed_seconds"].insert(0, 0)
@@ -96,6 +100,10 @@ for i, protocol_name in enumerate(protocols.keys()):
 
     ax.set_ylabel(stats[protocol_name]["unit"], fontsize=14)
     ax.set_ylim(bottom=0)
+    # INFO: This block is only needed to make the Y-axis scale consistent for the two experiments
+    if ylims is not None:
+        ax.yaxis.set_ticks(range(0, ylims[protocol_name], stats[protocol_name]["step_size"]))
+        ax.set_ylim(top=ylims[protocol_name])
 
     for tick_label in (ax.get_xticklabels() + ax.get_yticklabels()):
         tick_label.set_fontsize(14)
