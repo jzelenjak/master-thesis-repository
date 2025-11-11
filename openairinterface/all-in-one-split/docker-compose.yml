@@ -38,11 +38,11 @@ networks:
 services:
   ue:
     container_name: ue
-    # We use our own image with the modified source code
-    # For the normal behaviour, use the following (official) image instead
-    # image: oaisoftwarealliance/oai-nr-ue:2024.w39
-    image: rogue-ue
-    # We limit the CPU and memory resources of the UE container for the attack
+    # For normal behaviour, use the following (official) image instead
+    #image: oaisoftwarealliance/oai-nr-ue:2024.w39
+    # This is the image from the jzelenjak/openairinterface5g fork (with the modified source code)
+    image: rogue-oai-ue
+    # Limit the CPU and memory resources of the UE container for the attack
     deploy:
       resources:
         limits:
@@ -50,12 +50,14 @@ services:
           memory: 15G
     entrypoint: "/bin/bash -c"
     command:
-      # We make the UE a dummy container, so that we can launch the attacker scripts from it
-      # For the normal behaviour, use the command below instead
-      #- "sleep 30 && /opt/oai-nr-ue/bin/nr-uesoftmodem --rfsim --rfsimulator.serveraddr 192.168.80.129 -r 106 --numerology 1 --band 78 -C 3619200000 --ue-fo-compensation --sa -E --uicc0.imsi 001010000000001"
+      # For normal behaviour, use the command below instead
+      #- "sleep 30 && /opt/oai-nr-ue/bin/nr-uesoftmodem --rfsim --rfsimulator.serveraddr 192.168.80.129 -C 3450720000 -r 106 --numerology 1 --band 78 --ssb 516 -E --ue-fo-compensation --uicc0.imsi 001010000000001"
+      # Make the UE a dummy container, so that attack scripts can be launched from it
       - tail -f
     volumes:
       - ../scripts:/opt/oai-nr-ue/scripts
+      - ../scripts/loop_split.sh:/opt/oai-nr-ue/loop_split.sh
+      - ../scripts/flood_split.sh:/opt/oai-nr-ue/flood_split.sh
     cap_add:
       - NET_ADMIN
       - SYS_NICE
@@ -72,24 +74,28 @@ services:
 
   gnodeb-du:
     container_name: gnodeb-du
-    # The gNodeB docker image provided by OAI Alliance is built using AVX-512 instruction set
-    # We use our own image built without the need for AVX-512
-    # If you want to use the official DockerHub image from OAI, uncomment
-    # this line and comment the image and entrypoint.
-    # See the note about AVX-512 in the README.md.
+    # If you want to use the official DockerHub image from OAI, uncomment this line and comment out the image and entrypoint
+    # Note that this image is built using AVX-512 instruction set (see the note about AVX-512 in the README.md)
     #image: oaisoftwarealliance/oai-gnb:develop
-    image: oai-gnodeb
-    # We limit the CPU and memory resources of the gNB-DU container for the attack
+    # This is the image built using the Dockerfile in the ../gnodeb directory (using the tag 2024.w40)
+    # NOTE: When using this image, make sure to add --sa option to the command below
+    # In addition, the UE must use -C 3619200000 in the command
+    #image: oai-gnodeb
+    # This is the image from the jzelenjak/openairinterface5g fork
+    image: rogue-oai-gnodeb
+    # Limit the CPU and memory resources of the gNB-DU container for the attack
     deploy:
       resources:
         limits:
-          cpus: '4.0'
-          memory: 4G
+          cpus: '2.0'
+          memory: 2G
     entrypoint: "/bin/bash -c"
     command:
-      - "sleep 20 && /src/oai5g/cmake_targets/ran_build/build/nr-softmodem --rfsim --rfsimulator.serveraddr server -O /gnb-du.sa.band78.106prb.rfsim.conf --gNBs.[0].min_rxtxtime 6 --sa -E"
+      - "sleep 20 && /opt/oai-gnb/bin/nr-softmodem --rfsim --rfsimulator.serveraddr server -O /opt/oai-gnb/etc/gnb.conf --gNBs.[0].min_rxtxtime 6 -E"  # --sa
     volumes:
-      - ../core-network/gnb-du.sa.band78.106prb.rfsim.conf:/gnb-du.sa.band78.106prb.rfsim.conf
+      # If using the image built from the Dockerfile in the ../gnodeb directory (using the tag 2024:w40), use the volume below instead
+      #- ../core-network/gnb-du.sa.band78.106prb.rfsim.conf:/opt/oai-gnb/etc/gnb.conf
+      - ../gnodeb/gnb-du.sa.band78.106prb.rfsim.pci0.conf:/opt/oai-gnb/etc/gnb.conf
     restart: unless-stopped
     cap_add:
       - SYS_NICE
@@ -106,24 +112,28 @@ services:
 
   gnodeb-cu:
     container_name: gnodeb-cu
-    # The gNodeB docker image provided by OAI Alliance is built using AVX-512 instruction set
-    # We use our own image built without the need for AVX-512
-    # If you want to use the official DockerHub image from OAI, uncomment
-    # this line and comment the image and entrypoint.
-    # See the note about AVX-512 in the README.md.
+    # If you want to use the official DockerHub image from OAI, uncomment this line and comment out the image and entrypoint
+    # Note that this image is built using AVX-512 instruction set (see the note about AVX-512 in the README.md)
     #image: oaisoftwarealliance/oai-gnb:develop
-    image: oai-gnodeb
-    # We limit the CPU and memory resources of the gNB-CU container for the attack
+    # This is the image built using the Dockerfile in the ../gnodeb directory (using the tag 2024.w40)
+    # NOTE: When using this image, make sure to add --sa option to the command below
+    # In addition, the UE must use -C 3619200000 in the command
+    #image: oai-gnodeb
+    # This is the image from the jzelenjak/openairinterface5g fork
+    image: rogue-oai-gnodeb
+    # Limit the CPU and memory resources of the gNB-CU container for the attack
     deploy:
       resources:
         limits:
           cpus: '2.0'
-          memory: 4G
+          memory: 2G
     entrypoint: "/bin/bash -c"
     command:
-      - "sleep 15 && /src/oai5g/cmake_targets/ran_build/build/nr-softmodem -O gnb-cu.sa.band78.106prb.conf --sa"
+      - "sleep 15 && /opt/oai-gnb/bin/nr-softmodem -O /opt/oai-gnb/etc/gnb.conf"  # --sa
     volumes:
-      - ../core-network/gnb-cu.sa.band78.106prb.conf:/gnb-cu.sa.band78.106prb.conf
+      # If using the image built from the Dockerfile in the ../gnodeb directory (using the tag 2024:w40), use the volume below instead
+      #- ../core-network/gnb-cu.sa.band78.106prb.conf:/opt/oai-gnb/etc/gnb.conf
+      - ../gnodeb/gnb-cu.sa.f1.conf:/opt/oai-gnb/etc/gnb.conf
     restart: unless-stopped
     cap_add:
       - SYS_NICE
@@ -266,12 +276,12 @@ services:
     container_name: "oai-amf"
     # "develop" checked at 2024-10-08
     image: oaisoftwarealliance/oai-amf@sha256:c1391e33bfa398fb284a9fef467f0c0e46fbe1e1f8a38a6f04e0164d13a226e8
-    # We limit the CPU and memory resources of the AMF container for the attack
+    # Limit the CPU and memory resources of the AMF container for the attack
     deploy:
       resources:
         limits:
           cpus: '1.0'
-          memory: 4G
+          memory: 1G
     restart: unless-stopped
     expose:
       - 80/tcp

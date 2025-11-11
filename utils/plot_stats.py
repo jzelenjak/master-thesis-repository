@@ -11,9 +11,9 @@ import matplotlib.pyplot as plt
 
 # The number of CPU cores allocated to containers cannot be obtained from the docker stats output
 # For this reason, we hardcode it here, so that it can be used for Y-axis scaling
-CPU_CORES = {"ue": 15.0, "gnodeb": 2.0, "amf": 1.0}
+CPU_CORES = {"ue": 15.0, "gnodeb": 2.0, "amf": 1.0, "gnodeb-du": 2.0, "gnodeb-cu": 2.0, "oai-amf": 1.0}
 # More formal names for the entities corresponding to the containers
-CONTAINER_NAMES = {"gnodeb": "gNB", "gnodeb-du": "gNB-DU", "gnodeb-cu": "gNB-CU", "amf": "AMF", "ue": "UE"}
+CONTAINER_NAMES = {"gnodeb": "gNB", "gnodeb-du": "gNB-DU", "gnodeb-cu": "gNB-CU", "amf": "AMF", "ue": "UE", "oai-amf": "AMF"}
 # The file is assumed to be comma-separated (i.e. in the csv format)
 FILE_SEPARATOR = ","
 # The format of the timestamp in the stats file
@@ -116,7 +116,7 @@ for name in containers.keys():
     plt.gcf().set_size_inches(22, 12, forward=True)
     plt.tight_layout()
 
-    plt.savefig(f"stats_{name.replace('-', '_')}.pdf")
+    plt.savefig(f"stats_{name.replace('-', '_')}.png")
     plt.show()
     # https://stackoverflow.com/questions/8213522/when-to-use-cla-clf-or-close-for-clearing-a-plot 
     plt.close()
