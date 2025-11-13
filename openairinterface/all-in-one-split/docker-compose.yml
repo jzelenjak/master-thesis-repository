@@ -38,21 +38,22 @@ networks:
 services:
   ue:
     container_name: ue
-    # For normal behaviour, use the following (official) image instead
-    #image: oaisoftwarealliance/oai-nr-ue:2024.w39
-    # This is the image from the jzelenjak/openairinterface5g fork (with the modified source code)
+    # For normal behaviour, use the official image instead
+    #image: oaisoftwarealliance/oai-nr-ue:2025.w45
+    # For the attack, use the image built from the fork at https://github.com/jzelenjak/openairinterface5g
     image: rogue-oai-ue
     # Limit the CPU and memory resources of the UE container for the attack
     deploy:
       resources:
         limits:
           cpus: '15.0'
-          memory: 15G
+          memory: 4G
     entrypoint: "/bin/bash -c"
     command:
       # For normal behaviour, use the command below instead
-      #- "sleep 30 && /opt/oai-nr-ue/bin/nr-uesoftmodem --rfsim --rfsimulator.serveraddr 192.168.80.129 -C 3450720000 -r 106 --numerology 1 --band 78 --ssb 516 -E --ue-fo-compensation --uicc0.imsi 001010000000001"
-      # Make the UE a dummy container, so that attack scripts can be launched from it
+      # Note: Before tag 2024.w45, use `--sa` option to specify the SA mode
+        #- "sleep 30 && /opt/oai-nr-ue/bin/nr-uesoftmodem --rfsim --rfsimulator.serveraddr 192.168.80.129 -C 3619200000 -r 106 --numerology 1 --band 78 --ssb 516 -E --ue-fo-compensation --uicc0.imsi 001010000000001"
+      # For the attack, make the UE a dummy container, so that attack scripts can be launched from it
       - tail -f
     volumes:
       - ../scripts:/opt/oai-nr-ue/scripts
@@ -76,26 +77,24 @@ services:
     container_name: gnodeb-du
     # If you want to use the official DockerHub image from OAI, uncomment this line and comment out the image and entrypoint
     # Note that this image is built using AVX-512 instruction set (see the note about AVX-512 in the README.md)
-    #image: oaisoftwarealliance/oai-gnb:develop
-    # This is the image built using the Dockerfile in the ../gnodeb directory (using the tag 2024.w40)
-    # NOTE: When using this image, make sure to add --sa option to the command below
-    # In addition, the UE must use -C 3619200000 in the command
-    #image: oai-gnodeb
-    # This is the image from the jzelenjak/openairinterface5g fork
+    #image: oaisoftwarealliance/oai-gnb:2025.w45
+    # If you use the Dockerfile in the gnodeb/ directory, use the following image instead (update the tag if needed)
+    # Important: Before tag 2024.w45, use `--sa` option to specify the SA mode (for later versions, do *not* use --sa)
+    # You might also have use different gNB-DU configuration files (see the README in the gnodeb/ directory)
+    #image: oai-gnodeb-local:2024.w40
+    # For the attack, use the image built from the fork at https://github.com/jzelenjak/openairinterface5g
     image: rogue-oai-gnodeb
     # Limit the CPU and memory resources of the gNB-DU container for the attack
     deploy:
       resources:
         limits:
-          cpus: '2.0'
+          cpus: '4.0'
           memory: 2G
     entrypoint: "/bin/bash -c"
     command:
-      - "sleep 20 && /opt/oai-gnb/bin/nr-softmodem --rfsim --rfsimulator.serveraddr server -O /opt/oai-gnb/etc/gnb.conf --gNBs.[0].min_rxtxtime 6 -E"  # --sa
+      - "sleep 20 && /opt/oai-gnb/bin/nr-softmodem --rfsim --rfsimulator.serveraddr server -O /opt/oai-gnb/etc/gnb.conf --gNBs.[0].min_rxtxtime 6 -E"
     volumes:
-      # If using the image built from the Dockerfile in the ../gnodeb directory (using the tag 2024:w40), use the volume below instead
-      #- ../core-network/gnb-du.sa.band78.106prb.rfsim.conf:/opt/oai-gnb/etc/gnb.conf
-      - ../gnodeb/gnb-du.sa.band78.106prb.rfsim.pci0.conf:/opt/oai-gnb/etc/gnb.conf
+      - ../gnodeb/conf/gnb-du.sa.band78.106prb.rfsim.pci0.conf:/opt/oai-gnb/etc/gnb.conf
     restart: unless-stopped
     cap_add:
       - SYS_NICE
@@ -114,26 +113,24 @@ services:
     container_name: gnodeb-cu
     # If you want to use the official DockerHub image from OAI, uncomment this line and comment out the image and entrypoint
     # Note that this image is built using AVX-512 instruction set (see the note about AVX-512 in the README.md)
-    #image: oaisoftwarealliance/oai-gnb:develop
-    # This is the image built using the Dockerfile in the ../gnodeb directory (using the tag 2024.w40)
-    # NOTE: When using this image, make sure to add --sa option to the command below
-    # In addition, the UE must use -C 3619200000 in the command
-    #image: oai-gnodeb
-    # This is the image from the jzelenjak/openairinterface5g fork
+    #image: oaisoftwarealliance/oai-gnb:2025.w45
+    # If you use the Dockerfile in the gnodeb/ directory, use the following image instead (update the tag if needed)
+    # Important: Before tag 2024.w45, use `--sa` option to specify the SA mode (for later versions, do *not* use --sa)
+    # You might also have use different gNB-CU configuration files (see the README in the gnodeb/ directory)
+    #image: oai-gnodeb-local:2024.w40
+    # For the attack, use the image built from the fork at https://github.com/jzelenjak/openairinterface5g
     image: rogue-oai-gnodeb
     # Limit the CPU and memory resources of the gNB-CU container for the attack
     deploy:
       resources:
         limits:
-          cpus: '2.0'
-          memory: 2G
+          cpus: '1.0'
+          memory: 1G
     entrypoint: "/bin/bash -c"
     command:
-      - "sleep 15 && /opt/oai-gnb/bin/nr-softmodem -O /opt/oai-gnb/etc/gnb.conf"  # --sa
+      - "sleep 15 && /opt/oai-gnb/bin/nr-softmodem -O /opt/oai-gnb/etc/gnb.conf"
     volumes:
-      # If using the image built from the Dockerfile in the ../gnodeb directory (using the tag 2024:w40), use the volume below instead
-      #- ../core-network/gnb-cu.sa.band78.106prb.conf:/opt/oai-gnb/etc/gnb.conf
-      - ../gnodeb/gnb-cu.sa.f1.conf:/opt/oai-gnb/etc/gnb.conf
+      - ../gnodeb/conf/gnb-cu.sa.f1.conf:/opt/oai-gnb/etc/gnb.conf
     restart: unless-stopped
     cap_add:
       - SYS_NICE

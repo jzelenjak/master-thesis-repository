@@ -23,8 +23,8 @@ RUN git clone https://gitlab.eurecom.fr/oai/openairinterface5g /src/oai5g && \
 	./build_oai -I && \
 	./build_oai -w USRP --ninja --nrUE --gNB --build-lib "nrscope" -C
 
-# NOTE: These lines copy the relevant files to the same location as the other Dockerfiles
-# This is done so that the docker-compose.yml file can use the same commands with this image
+# NOTE: These lines copy the relevant files to the same location as the other Dockerfiles (from our OAI fork)
+# This is done so that docker-compose.yml files can use the same commands with this image
 WORKDIR /opt/oai-gnb/bin
 RUN cp /src/oai5g/cmake_targets/ran_build/build/nr-softmodem .
 
@@ -33,4 +33,4 @@ RUN cp /PROJECTS/GENERIC-NR-5GC/CONF/gnb.sa.band78.fr1.106PRB.usrpb210.conf .
 
 WORKDIR /opt/oai-gnb
 
-ENTRYPOINT ["/src/oai5g/cmake_targets/ran_build/build/nr-softmodem"]
+ENTRYPOINT ["/opt/oai-gnb/bin/nr-softmodem"]

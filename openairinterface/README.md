@@ -1,8 +1,9 @@
 # OAI 5G stack
 
-*Note: The configuration files and the Docker Compose files in this directory have been taken from the [official OpenAirInterface repository](https://gitlab.eurecom.fr/oai/openairinterface5g), and have been modified by Dr. Enrico Bassetti to have a single Docker Compose file to start all containers (with or without the gNB split). This README file has also been written by Dr. Enrico Bassetti. We adapt it to only include the relevant information for running the stack on a local machine.*
+*Note: The configuration files and the Docker Compose files in this directory have been taken from the [official OpenAirInterface repository](https://gitlab.eurecom.fr/oai/openairinterface5g), and have been modified by Dr. Enrico Bassetti to have a single Docker Compose file to start all containers (with or without the gNB split). This README file has also been written by Dr. Enrico Bassetti. We adapt it to only include the relevant information for running the stack on a local machine and using our OAI fork.*
 
 This repository contains an OpenAirInterface 5G stack configured and run using Docker containers.
+
 
 ## Requirements
 
@@ -19,23 +20,35 @@ At the time of writing, various tutorials (such as <https://gitlab.eurecom.fr/oa
 
 However, it most likely requires less memory and CPUs than that.
 
-To use the scripts and aliases in this repository, you need:
 
-* On Windows: Git Bash shell
-* On Linux: `git`, `bash` and `ssh`
-* Docker CLI (no need for Docker Desktop, the CLI suffices)
-* Wireshark
+## Setup
 
-## Preparing the environment
+For 5G Core Network, use the official OAI images (they are already specified in `docker-compose.yml` files).
 
-Deploying the stack on your local machine:
-  1. Be sure that you have all the requirements.
-  2. Build the image in the `gnodeb` directory. Refer to its README.
-  3. Modify the volume paths inside the `docker-compose.yml` file that you will deploy: all the volume paths starting with `/data` should be remapped to the `core-network/` directory (the one in this repository) using the an absolute path *(note: this has already been done)*.
+For NR UE and gNodeB, you can either use the OAI official images or build your own images, according to your needs.
+
+### Using OpenAirInterface repository (modified source code)
+
+You can use the OpenAirInterface repository and build the images for your modified source code.
+This subsection describes the process using our OAI fork for the flooding attack.
+However, the Dockerfiles and build scripts in that fork should also work for the official OAI repository (tested for the `2025.w45` version).
+
+1. Clone the OAI fork for the flooding attack from <https://github.com/jzelenjak/openairinterface5g>.
+2. Run `./build-oai-docker.sh` script in the fork repository to build the Docker images for NR UE and gNodeB.
+   Feel free to modify the image names and/or Dockerfiles according to your needs.
+3. Check that `docker-compose.yml` files refer to correct image names for NR UE and gNodeB (by default, the image names are consistent).
+
+### Using official OpenAirInterface images (original source code)
+
+To use the official OpenAirInterface images (for normal behaviour), make sure that `docker-compose.yml` files specify the official images (see the comments in those files).
+
+Note: If your machine does not support the AVX-512 instruction set, you can compile the gNodeB image locally. See README.md in the `gnodeb/` directory.
+
 
 ## Usage
 
-If you use your local machine, use standard docker commands to deploy the stack.
+Use standard Docker (Compose) commands to deploy the stack.
+
 
 ## Data storage (core network)
 
@@ -53,7 +66,7 @@ Note that gNodeB has a delay of 15 seconds on start, and the UE has a delay of 3
 
 ### AVX-512 / Crash on illegal instructions
 
-The gNodeB docker image provided by OAI Alliance is built using AVX-512, which may not be available. In the `gnodeb` directory, there is a `Dockerfile` that describes a docker image where the `nr-softmodem` is recompiled from scratch. By default, the configuration in this repository uses an image from there pre-built in Gitlab.
+The gNodeB docker image provided by OAI Alliance is built using AVX-512, which may not be available. In the `gnodeb` directory, there is a `Dockerfile` that describes a docker image where the `nr-softmodem` is recompiled from scratch.
 
 ### "Buffer overflow" on boot in the AMF/gNodeB/SMF
 
