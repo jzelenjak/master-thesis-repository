@@ -45,9 +45,8 @@ services:
       # For the attack, make the UE a dummy container, so that attack scripts can be launched from it
       - tail -f
     volumes:
-      - ../scripts:/opt/oai-nr-ue/scripts
-      - ../scripts/loop_full.sh:/opt/oai-nr-ue/loop_full.sh
-      - ../scripts/flood_full.sh:/opt/oai-nr-ue/flood_full.sh
+      - ../scripts/loop.sh:/opt/oai-nr-ue/loop.sh
+      - ../scripts/flood.sh:/opt/oai-nr-ue/flood.sh
     cap_add:
       - NET_ADMIN
       - SYS_NICE
@@ -76,7 +75,7 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '4.0'
+          cpus: '2.0'
           memory: 2G
     entrypoint: "/bin/bash -c"
     command:
