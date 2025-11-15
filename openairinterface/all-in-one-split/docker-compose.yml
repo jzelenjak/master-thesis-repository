@@ -87,13 +87,14 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '2.0'
+          cpus: '3.0'
           memory: 2G
     entrypoint: "/bin/bash -c"
     command:
-      - "sleep 20 && /opt/oai-gnb/bin/nr-softmodem --rfsim --rfsimulator.serveraddr server -O /opt/oai-gnb/etc/gnb.conf --gNBs.[0].min_rxtxtime 6 -E"
+      - "sleep 20 && /opt/oai-gnb/bin/nr-softmodem --rfsim --rfsimulator.serveraddr server -O /opt/oai-gnb/etc/gnb.conf --gNBs.[0].min_rxtxtime 6 -E | tee /opt/oai-gnb/bin/logs/logs_gnodeb_du.txt"
     volumes:
       - ../gnodeb/conf/gnb-du.sa.band78.106prb.rfsim.conf:/opt/oai-gnb/etc/gnb.conf
+      - ./logs:/opt/oai-gnb/bin/logs/
     restart: unless-stopped
     cap_add:
       - SYS_NICE
@@ -127,9 +128,10 @@ services:
           memory: 1G
     entrypoint: "/bin/bash -c"
     command:
-      - "sleep 15 && /opt/oai-gnb/bin/nr-softmodem -O /opt/oai-gnb/etc/gnb.conf"
+      - "sleep 15 && /opt/oai-gnb/bin/nr-softmodem -O /opt/oai-gnb/etc/gnb.conf | tee /opt/oai-gnb/bin/logs/logs_gnodeb_cu.txt"
     volumes:
       - ../gnodeb/conf/gnb-cu.sa.f1.conf:/opt/oai-gnb/etc/gnb.conf
+      - ./logs:/opt/oai-gnb/bin/logs/
     restart: unless-stopped
     cap_add:
       - SYS_NICE
