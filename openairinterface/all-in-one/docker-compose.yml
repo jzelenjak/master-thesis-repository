@@ -316,3 +316,31 @@ services:
         ipv4_address: 192.168.70.135
     labels:
       role: "cn"
+
+### EXTRA
+  victim_ue:
+    container_name: victim_ue
+    image: oaisoftwarealliance/oai-nr-ue:2025.w45
+    entrypoint: "/bin/bash -c"
+    command:
+      # To connect the victim UE to the network on container startup, use the command below instead
+      # Note: The victim UE uses IMSI 001010000000002, because IMSI 001010000000001 is already used by the attacker UE
+      # Note: Before tag 2024.w45, use `--sa` option to specify the SA mode
+        #- "sleep 30 && /opt/oai-nr-ue/bin/nr-uesoftmodem --rfsim --rfsimulator.serveraddr 192.168.80.129 -C 3619200000 -r 106 --numerology 1 --band 78 --ssb 516 -E --ue-fo-compensation --uicc0.imsi 001010000000002"
+      # To connect the victim UE to the network manually, make it a dummy container and run ./start.sh script from it
+      - tail -f
+    volumes:
+      - ../scripts/start.sh:/opt/oai-nr-ue/start.sh
+    cap_add:
+      - NET_ADMIN
+      - SYS_NICE
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    restart: unless-stopped
+    networks:
+      radio_net:
+        ipv4_address: 192.168.80.127
+    depends_on:
+      - gnodeb
+    labels:
+      role: "ue"
