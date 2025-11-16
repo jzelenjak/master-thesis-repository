@@ -229,7 +229,7 @@ services:
 
   free5gc-tngf:
     container_name: tngf
-    image: free5gc/tngf:latest
+    image: free5gc/tngf:v4.0.0
     command: ./tngf -c ./config/tngfcfg.yaml
     volumes:
       - ./config/tngfcfg.yaml:/free5gc/config/tngfcfg.yaml
@@ -246,7 +246,7 @@ services:
 
   free5gc-nef:
     container_name: nef
-    image: free5gc/nef:latest
+    image: free5gc/nef:v4.0.0
     command: ./nef -c ./config/nefcfg.yaml
     expose:
       - "8000"
@@ -289,7 +289,7 @@ services:
     container_name: gnodeb
     # We use our own image with the modified source code
     # For the normal behaviour, use the following (official) image instead
-    # image: free5gc/ueransim:latest
+    # image: free5gc/ueransim:v4.0.1
     image: rogue-ueransim
     # We create a dummy container, so that we can start the gNB ourselves
     # To start the gNB on container creation, use the command below instead
@@ -304,7 +304,7 @@ services:
     volumes:
       - ./config/gnbcfg.yaml:/ueransim/config/gnbcfg.yaml
       - ./config/uecfg.yaml:/ueransim/config/uecfg.yaml
-      - ./output_logs:/ueransim/output_logs  # for the logs with the UE connections
+      - ./logs:/ueransim/logs  # for the logs with the UE connections
     cap_add:
       - NET_ADMIN
     devices:
@@ -321,7 +321,7 @@ services:
     container_name: ue
     # We use our own image with the modified source code
     # For the normal behaviour, use the following (official) image instead
-    # image: free5gc/ueransim:latest
+    # image: free5gc/ueransim:v4.0.1
     image: rogue-ueransim
     # We create a dummy container, so that we can launch the attack scripts from it
     # To start the UE on container creation, use the command below instead
@@ -350,7 +350,7 @@ services:
   
   victim_ue:
     container_name: victim_ue
-    image: free5gc/ueransim:latest
+    image: free5gc/ueransim:v4.0.1
     # We create a dummy container, so that we can start the victim UE ourselves
     # To start the victim UE on container creation, use the command below instead
     # command: ./nr-ue -c ./config/uecfg.yaml
@@ -370,7 +370,7 @@ services:
 
   n3iwue:
     container_name: n3iwue
-    image: free5gc/n3iwue:latest
+    image: free5gc/n3iwue:v4.0.0
     command: bash -c "ip route del default && ip route add default via 10.100.200.1 dev eth0 metric 203 && sleep infinity"
     volumes:
       - ./config/n3uecfg.yaml:/n3iwue/config/n3ue.yaml

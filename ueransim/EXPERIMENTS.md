@@ -7,24 +7,9 @@
 
 ## Setup
 
-Clone [the official UERANSIM repository](https://github.com/aligungr/UERANSIM) into the [free5gc-compose/](./free5gc-compose/) directory. You will need to add a couple of modifications to the source code.
+Clone [the UERANSIM fork](https://github.com/jzelenjak/UERANSIM) with the modifications for the flooding attack.
 
-First, modify the `src/ue/rrc/connection.cpp` file to make the UE exit as soon as it has sent the RRCSetupComplete + Registration Request messages. To do this, add the line `exit(0);` at the end of the function `UeRrcTask::receiveRrcSetup`.
-
-Next, to track the number of UE connections, add the following logging lines to the gNB code:
-- `src/gnb/rrc/ues.cpp`: At the end of the function `GnbRrcTask::createUe`, add a line like:
-```c++
-m_logger->info("[JEGOR] Create RRC UE Context for UE ID %d. Stored RRC contexts: %d", id, m_ueCtx.size());
-```
-- `src/gnb/rls/udp_task.cpp`: In the function `RlsUdpTask::receiveRlsPdu`, after the new UE has been added to the `m_ueMap` (in the "else" block with the line `int ueId = ++m_newIdCounter;`), add a line like:
-```c++
-m_logger->info("[JEGOR] New UE with ueId: %d. Active UE RLS UDP connections: %d", ueId, m_ueMap.size());
-```
-*(You can use different text, but you need to use the size of the corresponding maps.)*
-
-Now compile the UERANSIM source code (run the [./build_docker.sh](./free5gc-compose/build_docker.sh) script).
-If you get compilation errors related to missing include files, just do what the compiler tells you to do
-(I had to add some includes into a couple of files, but I am not sure if it will be an issue for others).
+Compile the (modified) UERANSIM source code by running the `./build_docker.sh` script. This will build a Docker image with the UE and the gNB.
 
 For more information about building and using UERANSIM with free5gc, see the [README.md](./free5gc-compose/README.md) in the [free5gc-compose/](./free5gc-compose/) directory.
 
@@ -93,6 +78,8 @@ To perform the experiment with connecting a legitimate UE to the network during 
 ./nr-ue -c config/uecfg.yaml
 ```
 The victim UE uses the official UERANSIM image, so the UE will behave as normal.
+
+Note: If the victim UE cannot successfully establish a PDU session, check if the [gtp5g](https://github.com/free5gc/gtp5g) kernel module is loaded.
 
 **Step 3.** (Optional) Enter the `victim_ue` container again and start a `ping`, e.g.:
 ```sh

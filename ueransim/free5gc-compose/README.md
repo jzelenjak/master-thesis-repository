@@ -21,8 +21,12 @@ For further information, please refer to the [the official free5gc compose repos
 ## Building a local UE image
 
 To use the local version of UERANSIM:
-1. Clone [the official UERANSIM repository](https://github.com/aligungr/UERANSIM) and place it in the current directory.
-2. Build the image by running the [./build_docker.sh](./build_docker.sh) script (feel free to change the image name, but also update it in the [docker-compose.yaml](./docker-compose.yaml) file).
+1. Clone [the official UERANSIM repository](https://github.com/aligungr/UERANSIM).
+2. Build the executables for the UE and the gNB, as specified in the official repository.
+
+For the flooding attack, use the modified UERANSIM source code:
+1. Clone [the UERANSIM fork](https://github.com/jzelenjak/UERANSIM) with the modifications for the flooding attack.
+2. Build a Docker image for the UE and the gNB by running the `./build_docker.sh` script. This script can also be used to build the original source code.
 
 ## Usage
 
