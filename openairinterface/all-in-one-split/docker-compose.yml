@@ -58,6 +58,7 @@ services:
     volumes:
       - ../scripts/loop.sh:/opt/oai-nr-ue/loop.sh
       - ../scripts/flood.sh:/opt/oai-nr-ue/flood.sh
+      - ./logs:/opt/oai-nr-ue/logs/
     cap_add:
       - NET_ADMIN
       - SYS_NICE
@@ -91,10 +92,10 @@ services:
           memory: 2G
     entrypoint: "/bin/bash -c"
     command:
-      - "sleep 20 && /opt/oai-gnb/bin/nr-softmodem --rfsim --rfsimulator.serveraddr server -O /opt/oai-gnb/etc/gnb.conf --gNBs.[0].min_rxtxtime 6 -E | tee /opt/oai-gnb/bin/logs/logs_gnodeb_du.txt"
+      - "sleep 20 && /opt/oai-gnb/bin/nr-softmodem --rfsim --rfsimulator.serveraddr server -O /opt/oai-gnb/etc/gnb.conf --gNBs.[0].min_rxtxtime 6 -E | tee /opt/oai-gnb/logs/logs_gnodeb_du.txt"
     volumes:
       - ../gnodeb/conf/gnb-du.sa.band78.106prb.rfsim.conf:/opt/oai-gnb/etc/gnb.conf
-      - ./logs:/opt/oai-gnb/bin/logs/
+      - ./logs:/opt/oai-gnb/logs/
     restart: unless-stopped
     cap_add:
       - SYS_NICE
@@ -128,10 +129,10 @@ services:
           memory: 1G
     entrypoint: "/bin/bash -c"
     command:
-      - "sleep 15 && /opt/oai-gnb/bin/nr-softmodem -O /opt/oai-gnb/etc/gnb.conf | tee /opt/oai-gnb/bin/logs/logs_gnodeb_cu.txt"
+      - "sleep 15 && /opt/oai-gnb/bin/nr-softmodem -O /opt/oai-gnb/etc/gnb.conf | tee /opt/oai-gnb/logs/logs_gnodeb_cu.txt"
     volumes:
       - ../gnodeb/conf/gnb-cu.sa.f1.conf:/opt/oai-gnb/etc/gnb.conf
-      - ./logs:/opt/oai-gnb/bin/logs/
+      - ./logs:/opt/oai-gnb/logs/
     restart: unless-stopped
     cap_add:
       - SYS_NICE

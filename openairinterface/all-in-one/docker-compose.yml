@@ -47,6 +47,7 @@ services:
     volumes:
       - ../scripts/loop.sh:/opt/oai-nr-ue/loop.sh
       - ../scripts/flood.sh:/opt/oai-nr-ue/flood.sh
+      - ./logs:/opt/oai-nr-ue/logs/
     cap_add:
       - NET_ADMIN
       - SYS_NICE
@@ -79,9 +80,9 @@ services:
           memory: 2G
     entrypoint: "/bin/bash -c"
     command:
-      - "sleep 15 && /opt/oai-gnb/bin/nr-softmodem --rfsim --rfsimulator.serveraddr server -O /opt/oai-gnb/etc/gnb.sa.band78.fr1.106PRB.usrpb210.conf --gNBs.[0].min_rxtxtime 6 -E | tee /opt/oai-gnb/bin/logs/logs_gnodeb.txt"
+      - "sleep 15 && /opt/oai-gnb/bin/nr-softmodem --rfsim --rfsimulator.serveraddr server -O /opt/oai-gnb/etc/gnb.sa.band78.fr1.106PRB.usrpb210.conf --gNBs.[0].min_rxtxtime 6 -E | tee /opt/oai-gnb/logs/logs_gnodeb.txt"
     volumes:
-      - ./logs:/opt/oai-gnb/bin/logs/
+      - ./logs:/opt/oai-gnb/logs/
     restart: unless-stopped
     cap_add:
       - SYS_NICE
