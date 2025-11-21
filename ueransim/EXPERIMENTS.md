@@ -104,7 +104,8 @@ In this case, assuming the flooding rate is not too low, the victim UE will most
 
 To plot the resource utilization statistics, run:
 ```sh
-python plot_stats.py stats_exp1.csv
+python plot_stats.py stats_exp1.csv                 # To plot only one experiment
+python plot_stats.py stats_exp1.csv stats_exp2.csv  # To plot both experiments
 ```
 *(If necessary, modify the number of CPU cores used by the UE container in the [plot_stats.py](../utils/plot_stats.py) script.)*
 
