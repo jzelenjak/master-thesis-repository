@@ -35,6 +35,9 @@ MARKER_SIZE = 8
 LINE_WIDTH = 4
 LINE_ALPHA = 0.6
 
+# Elapsed seconds before the attack started
+ATTACK_START = 10
+
 # A helper function to parse and convert memory usage into the specified unit
 PREFIX_FACTORS = {"KiB": 2**10, "MiB": 2**20, "GiB": 2**30}
 def parse_mem_usage(s: str, output_unit: str = "GiB") -> float:
@@ -103,6 +106,7 @@ print(colored("Warning: Using the following values for the number allocated CPU 
 for container_name, cpu_cores in CPU_CORES.items():
     print(colored(f"  {container_name}: {cpu_cores}", color="yellow"))
 print(colored(f"Make sure to change these values if you have updated them in the Docker Compose file(s)", color="yellow"))
+print(colored(f"Warning: Using {ATTACK_START} seconds as the start of the attack", color="yellow"))
 
 # INFO: Define some values for the metrics that will be plotted
 # NOTE: "color" is only used when a single experiment file has been provided
@@ -130,13 +134,17 @@ for container_name in containers:
     for i, metric in enumerate(stats.keys()):
         ax = axes[i]
         max_elapsed_seconds = 60
+
         # INFO: Plot the metric for each experiment 
         for index in range(len(experiments)):
             container = experiments[index][container_name]
             xlim = max(max_elapsed_seconds, container["elapsed_seconds"][-1])
             color = stats[metric]["color"] if len(experiments) == 1 else exp_colors[index]
             ax.plot(container["elapsed_seconds"], container[metric], color=color, marker='o', markersize=MARKER_SIZE, \
-                    linestyle='dashed', dashes=(3 + index, 2), linewidth=LINE_WIDTH, alpha=LINE_ALPHA, label=f"Experiment {index + 1} ({exp_labels[index]})")
+                    linestyle="dashed", dashes=(3 + index, 2), linewidth=LINE_WIDTH, alpha=LINE_ALPHA, label=f"Experiment {index + 1} ({exp_labels[index]})")
+
+        # INFO: Plot the start of the attack to give an indication of the baseline
+        ax.axvline(x=ATTACK_START, color="grey", linestyle="dashed", dashes=(2, 2), linewidth=LINE_WIDTH + 1, alpha=LINE_ALPHA, label="Attack start")
 
         ax.set_xlabel("Elapsed seconds", fontsize=FONT_SIZE_TEXT)
         ax.xaxis.set_ticks(range(0, max_elapsed_seconds + 4, 5))
