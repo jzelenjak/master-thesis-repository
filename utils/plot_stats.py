@@ -129,7 +129,7 @@ for container_name in containers:
     # INFO: Specify the number of allocated CPU cores to adjust the Y-axis
     stats["cpu_perc"]["max_value"] = 100 * CPU_CORES[container_name]
 
-    # INFO: One subplot of each metric (cpu_perc, mem_perc, mem_usage)
+    # INFO: One subplot for each metric (cpu_perc, mem_perc, mem_usage)
     fig, axes = plt.subplots(len(stats))
     for i, metric in enumerate(stats.keys()):
         ax = axes[i]
@@ -138,7 +138,7 @@ for container_name in containers:
         # INFO: Plot the metric for each experiment 
         for index in range(len(experiments)):
             container = experiments[index][container_name]
-            xlim = max(max_elapsed_seconds, container["elapsed_seconds"][-1])
+            max_elapsed_seconds = max(max_elapsed_seconds, container["elapsed_seconds"][-1])
             color = stats[metric]["color"] if len(experiments) == 1 else exp_colors[index]
             ax.plot(container["elapsed_seconds"], container[metric], color=color, marker='o', markersize=MARKER_SIZE, \
                     linestyle="dashed", dashes=(3 + index, 2), linewidth=LINE_WIDTH, alpha=LINE_ALPHA, label=f"Experiment {index + 1} ({exp_labels[index]})")
