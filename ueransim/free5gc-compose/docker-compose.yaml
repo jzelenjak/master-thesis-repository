@@ -50,13 +50,13 @@ services:
   free5gc-amf:
     container_name: amf
     image: free5gc/amf:v4.0.0
-    command: ./amf -c ./config/amfcfg.yaml
-    # We limit the CPU and memory resources of the AMF container for the attack
+    # Limit the CPU and memory resources of the AMF container for the attack
     deploy:
       resources:
         limits:
           cpus: '1.0'
           memory: 1G
+    command: ./amf -c ./config/amfcfg.yaml
     expose:
       - "8000"
     volumes:
@@ -287,20 +287,22 @@ services:
 
   gnodeb:
     container_name: gnodeb
-    # We use our own image with the modified source code
-    # For the normal behaviour, use the following (official) image instead
+    # If you want to use the official DockerHub image for UERANSIM, uncomment this line and comment out the image and entrypoint
     # image: free5gc/ueransim:v4.0.1
+    # For the attack, use the image built from the fork at https://github.com/jzelenjak/UERANSIM
     image: rogue-ueransim
-    # We create a dummy container, so that we can start the gNB ourselves
-    # To start the gNB on container creation, use the command below instead
-    # command: ./nr-gnb -c ./config/gnbcfg.yaml
-    command: tail -f
-    # We limit the CPU and memory resources of the gNB container for the attack
+    # Limit the CPU and memory resources of the gNB container for the attack
     deploy:
       resources:
         limits:
           cpus: '2.0'
           memory: 2G
+    entrypoint: "/bin/bash -c"
+    command:
+      # To start the gNB on container creation, use the command below instead
+      # - ./nr-gnb -c ./config/gnbcfg.yaml
+      # For the attack, make the gNB a dummy container, so that we can start the gNB ourselves
+      - tail -f
     volumes:
       - ./config/gnbcfg.yaml:/ueransim/config/gnbcfg.yaml
       - ./config/uecfg.yaml:/ueransim/config/uecfg.yaml
@@ -319,21 +321,22 @@ services:
 
   ue:
     container_name: ue
-    # We use our own image with the modified source code
-    # For the normal behaviour, use the following (official) image instead
+    # For normal behaviour, use the official image instead
     # image: free5gc/ueransim:v4.0.1
+    # For the attack, use the image built from the fork at https://github.com/jzelenjak/UERANSIM
     image: rogue-ueransim
-    # We create a dummy container, so that we can launch the attack scripts from it
-    # To start the UE on container creation, use the command below instead
-    # (This probably does not make sense for the attacker UE)
-    # command: ./nr-ue -c ./config/uecfg.yaml
-    command: tail -f
-    # We limit the CPU and memory resources of the UE container for the attack
+    # Limit the CPU and memory resources of the UE container for the attack
     deploy:
       resources:
         limits:
           cpus: '15.0'
           memory: 4G
+    entrypoint: "/bin/bash -c"
+    command:
+      # To start the UE on container creation, use the command below instead
+      # - ./nr-ue -c ./config/uecfg.yaml
+      # For the attack, make the UE a dummy container, so that attack scripts can be launched from it
+      - tail -f
     volumes:
       - ./config/uecfg.yaml:/ueransim/config/uecfg.yaml
       - ../scripts:/ueransim/scripts
@@ -351,10 +354,12 @@ services:
   victim_ue:
     container_name: victim_ue
     image: free5gc/ueransim:v4.0.1
-    # We create a dummy container, so that we can start the victim UE ourselves
-    # To start the victim UE on container creation, use the command below instead
-    # command: ./nr-ue -c ./config/uecfg.yaml
-    command: tail -f
+    entrypoint: "/bin/bash -c"
+    command:
+      # To start the victim UE on container creation, use the command below instead
+      # - ./nr-ue -c ./config/uecfg.yaml
+      # For the attack, make the victim UE a dummy container, so that we can start the victim UE ourselves
+      - tail -f
     volumes:
       - ./config/uecfg2.yaml:/ueransim/config/uecfg.yaml
     cap_add:
