@@ -9,7 +9,7 @@ IFS=$'\n\t'
 
 umask 077
 
-FLOODING_RATE=100
+FLOODING_RATE=115
 
 # Start with IMSI ..3, because IMSIs ..1 and ..2 are registered in the network
 NUM=2

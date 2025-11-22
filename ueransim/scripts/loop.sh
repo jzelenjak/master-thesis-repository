@@ -9,7 +9,7 @@ IFS=$'\n\t'
 
 umask 077
 
-FLOODING_RATE=130
+FLOODING_RATE=115
 
 while true; do
 	for i in $(seq 1 "$FLOODING_RATE"); do

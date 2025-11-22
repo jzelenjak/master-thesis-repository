@@ -28,7 +28,7 @@ docker exec -it container bash`
 ```
 
 I recommend using `tmux` (or any other terminal multiplexer) and have four tabs:
-- **Tab 1:** Enter the `gnodeb` container. To start the gNB, you will have to run `./nr-gnb -c config/gnbcfg.yaml`. To store the logs for the UE connections for later processing, you can pipe the gNB output to a file, e.g. `./nr-gnb -c config/gnbcfg.yaml | tee output_logs/gnodeb_logs_full.txt`
+- **Tab 1:** Enter the `gnodeb` container. To start the gNB, you will have to run `./nr-gnb -c config/gnbcfg.yaml`. To store the logs for the UE connections for later processing, you can pipe the gNB output to a file, e.g. `./nr-gnb -c config/gnbcfg.yaml | tee logs/gnodeb_logs_full.txt`
 - **Tab 2:** Enter the `ue` container. For Experiment 1, you will have to run [./loop.sh](./scripts/loop.sh). For Experiment 2, you will have to run [./flood.sh](./scripts/flood.sh). The script [./start.sh](./scripts/start.sh) just starts one UE (the same as starting it manually by running `./nr-ue -c config/uecfg.yaml`)
 - **Tab 3:** Stay in the current directory. To start monitoring the container stats, you need the [./log_stats.sh](../utils/log_stats.sh) script. You could also be in the [free5gc-compose/](./free5gc-compose/) directory, however all the needed scripts are in the present directory. You will have to run `./log_stats.sh -o stats_exp1.csv gnodeb amf ue` (or `stats_exp2.csv`, although the file name does not matter). To log the stats without writing them to the file (i.e. just printing them to the terminal), run `./log_stats.sh gnodeb amf ue`. Note that the UERANSIM logging seems to use the UTC time, so to make the time consistent, add the `-u` flag, i.e. `./log_stats.sh -u -o stats_exp1.csv gnodeb amf ue`
 - **Tab 4:** This tab can be used for the AMF or the victim UE. For the AMF, you can check the logs (`docker logs -f amf`) to see if the UE Registration Requests are reaching the AMF. For the victim UE, you can enter the container and see if it can connect to the gNB (and the core network) during the attack (this can be done as a separate experiment, not necessarily together with logging the stats)
@@ -44,14 +44,14 @@ For each of the two experiments, perform the following steps:
 
 **Step 1.** Inside the `gnodeb` container, start the gNB:
 ```sh
-./nr-gnb -c config/gnbcfg.yaml | tee output_logs/gnodeb_connections_raw_exp1.txt
+./nr-gnb -c config/gnbcfg.yaml | tee logs/gnodeb_logs_full_exp1.txt
 ```
 
 **Step 2.** In the current directory, start logging the stats:
 ```sh
 ./log_stats.sh -u -o stats_exp1.csv gnodeb amf ue
 ```
-Wait for a couple of iterations (to show the resource utilization before the attack).
+Wait for around 4-5 iterations (to show the baseline resource utilization before the attack).
 
 **Step 3.** Inside the `ue` container, launch the attack:
 ```sh
@@ -117,7 +117,7 @@ To plot the active RLS UDP connections and the total stored RRC contexts over ti
 
 **Step 1.** To parse the gNB logs with UE connections and save them into a csv file, run:
 ```sh
-./parse_gnodeb_logs.sh -o connections_exp1.csv free5gc-compose/output_logs/gnodeb_connections_raw_exp1.txt
+./parse_gnodeb_logs.sh -o connections_exp1.csv free5gc-compose/logs/gnodeb_logs_full_exp1.txt
 ```
 (Without the `-o` option the output is simply written to the standard output.)
 

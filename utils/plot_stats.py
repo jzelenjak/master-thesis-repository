@@ -33,7 +33,7 @@ FONT_SIZE_SUBTITLE = 20
 FONT_SIZE_TITLE = 22
 MARKER_SIZE = 8
 LINE_WIDTH = 4
-LINE_ALPHA = 0.55
+LINE_ALPHA = 0.6
 
 # A helper function to parse and convert memory usage into the specified unit
 PREFIX_FACTORS = {"KiB": 2**10, "MiB": 2**20, "GiB": 2**30}
@@ -136,7 +136,7 @@ for container_name in containers:
             xlim = max(max_elapsed_seconds, container["elapsed_seconds"][-1])
             color = stats[metric]["color"] if len(experiments) == 1 else exp_colors[index]
             ax.plot(container["elapsed_seconds"], container[metric], color=color, marker='o', markersize=MARKER_SIZE, \
-                    linestyle='dashed', linewidth=LINE_WIDTH, alpha=LINE_ALPHA, label=f"Experiment {index + 1} ({exp_labels[index]})")
+                    linestyle='dashed', dashes=(3 + index, 2), linewidth=LINE_WIDTH, alpha=LINE_ALPHA, label=f"Experiment {index + 1} ({exp_labels[index]})")
 
         ax.set_xlabel("Elapsed seconds", fontsize=FONT_SIZE_TEXT)
         ax.xaxis.set_ticks(range(0, max_elapsed_seconds + 4, 5))

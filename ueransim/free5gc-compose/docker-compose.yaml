@@ -300,7 +300,7 @@ services:
       resources:
         limits:
           cpus: '2.0'
-          memory: 1G
+          memory: 2G
     volumes:
       - ./config/gnbcfg.yaml:/ueransim/config/gnbcfg.yaml
       - ./config/uecfg.yaml:/ueransim/config/uecfg.yaml
@@ -347,7 +347,7 @@ services:
           - ue.free5gc.org
     depends_on:
       - gnodeb
-  
+
   victim_ue:
     container_name: victim_ue
     image: free5gc/ueransim:v4.0.1
