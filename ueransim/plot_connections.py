@@ -112,7 +112,7 @@ stats = {
 exp_colors = ["red", "blue"]
 exp_labels = ["Valid IMSI", "Invalid IMSIs"]
 
-# INFO: Take the first protocol as a reference, but plot all experiments
+# INFO: Take the first experiment as a reference, but plot all experiments
 protocols = experiments[0]
 # INFO: One subplot is generated for each protocol
 fig, axes = plt.subplots(len(protocols))
@@ -134,7 +134,7 @@ for i, protocol_name in enumerate(protocols.keys()):
         ax.plot(protocol["elapsed_seconds"], protocol["connections"], color=color, marker='o', markersize=MARKER_SIZE, \
                 linestyle="dashed", dashes=(3 + index, 2), linewidth=LINE_WIDTH, alpha=LINE_ALPHA, label=f"Experiment {index + 1} ({exp_labels[index]})")
 
-    # INFO: Plot the start of the attack to give an indication of the baseline
+    # INFO: Plot the start of the attack
     if ATTACK_START > 0:
         ax.axvline(x=ATTACK_START, color="grey", linestyle="dashed", dashes=(2, 2), linewidth=LINE_WIDTH + 1, alpha=LINE_ALPHA, label="Attack start")
 
