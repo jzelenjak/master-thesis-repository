@@ -133,7 +133,7 @@ for protocol_name in protocols:
                 protocol["elapsed_seconds"].insert(0, protocol["elapsed_seconds"][0] - 1)
                 protocol["elapsed_seconds"].insert(0, 0)
                 # NOTE: We do this for all metrics to keep it consistent
-                # This if block will only be executed once for each protocol
+                # This if block will be executed only once for each protocol
                 for m in stats.keys():
                     protocol[m].insert(0, 0)
                     protocol[m].insert(1, 0)
@@ -144,7 +144,6 @@ for protocol_name in protocols:
         # INFO: Plot the start of the attack
         if ATTACK_START > 0:
             ax.axvline(x=ATTACK_START, color="grey", linestyle="dashed", dashes=(2, 2), linewidth=LINE_WIDTH + 1, alpha=LINE_ALPHA, label="Attack start")
-
 
         ax.set_xlabel("Elapsed seconds", fontsize=FONT_SIZE_TEXT)
         ax.xaxis.set_ticks(range(0, max_elapsed_seconds + 4, 5))
