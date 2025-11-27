@@ -1,0 +1,359 @@
+volumes:
+  db-data:
+
+networks:
+  radio_net:
+    driver: bridge
+    name: oai-cn5g-radio-net
+    ipam:
+      config:
+        - subnet: 192.168.80.0/24
+    driver_opts:
+      com.docker.network.bridge.name: "oai-radio5g"
+    labels:
+      role: "gnb"
+
+  core_net:
+    driver: bridge
+    name: oai-cn5g-public-net
+    ipam:
+      config:
+        - subnet: 192.168.70.0/24
+    driver_opts:
+      com.docker.network.bridge.name: "oai-cn5g"
+    labels:
+      role: "cn"
+
+services:
+  ue:
+    container_name: ue
+    # For normal behaviour, use the official image instead
+    #image: oaisoftwarealliance/oai-nr-ue:2025.w45
+    # For the attack, use the image built from the fork at https://github.com/jzelenjak/openairinterface5g
+    image: rogue-oai-ue
+    # Limit the CPU and memory resources of the UE container for the attack
+    deploy:
+      resources:
+        limits:
+          cpus: '15.0'
+          memory: 4G
+    entrypoint: "/bin/bash -c"
+    command:
+      # For normal behaviour, use the command below instead
+      # Note: Before tag 2024.w45, use `--sa` option to specify the SA mode
+      #- "sleep 30 && /opt/oai-nr-ue/bin/nr-uesoftmodem -O /opt/oai-nr-ue/etc/ue.conf --band 254 -C 2488400000 --CO -873500000 -r 25 --numerology 0 --ssb 60 --ue-fo-compensation --rfsim --rfsimulator.prop_delay 20 --rfsimulator.options chanmod --rfsimulator.serveraddr 192.168.80.129 --time-sync-I 0.1 --ntn-initial-time-drift -46 --autonomous-ta --initial-fo 57340 --cont-fo-comp 2 --uicc0.imsi 001010000000001"
+      # For the attack, make the UE a dummy container, so that attack scripts can be launched from it
+      - tail -f
+    volumes:
+      - ../scripts/loop_leo.sh:/opt/oai-nr-ue/loop.sh
+      - ../scripts/flood_leo.sh:/opt/oai-nr-ue/flood.sh
+      # Alternatively, those two files can be used (make sure to "@include" the channelmod file inside the ue.conf)
+      #- ../ntn/ue.conf:/opt/oai-nr-ue/etc/ue.conf
+      #- ../ntn/channelmod_rfsimu_LEO_satellite.conf:/opt/oai-nr-ue/etc/channelmod_rfsimu_LEO_satellite.conf
+      - ../ntn/nrue.uicc.ntn-leo.conf:/opt/oai-nr-ue/etc/ue.conf
+      # For regenerative payload use the config file below instead
+      #- ../ntn/nrue.uicc.ntn-leo-regen.conf:/opt/oai-nr-ue/etc/ue.conf
+      - ./logs:/opt/oai-nr-ue/logs/
+    cap_add:
+      - NET_ADMIN
+      - SYS_NICE
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    restart: unless-stopped
+    networks:
+      radio_net:
+        ipv4_address: 192.168.80.128
+    depends_on:
+      - gnodeb
+    labels:
+      role: "ue"
+
+  gnodeb:
+    container_name: gnodeb
+    # If you want to use the official DockerHub image from OAI, uncomment this line and comment out the image and entrypoint
+    # Note that this image is built using AVX-512 instruction set (see the note about AVX-512 in the README.md)
+    #image: oaisoftwarealliance/oai-gnb:2025.w45
+    # If you use the Dockerfile in the gnodeb/ directory, use the following image instead (update the tag if needed)
+    # Important: Before tag 2024.w45, use `--sa` option to specify the SA mode (for later versions, do *not* use --sa)
+    #image: oai-gnodeb-local:2024.w40
+    # For the attack, use the image built from the fork at https://github.com/jzelenjak/openairinterface5g
+    image: rogue-oai-gnodeb
+    # Limit the CPU and memory resources of the gNB container for the attack
+    deploy:
+      resources:
+        limits:
+          cpus: '3.0'
+          memory: 2G
+    entrypoint: "/bin/bash -c"
+    command:
+      - "sleep 15 && /opt/oai-gnb/bin/nr-softmodem -O /opt/oai-gnb/etc/gnb.conf --rfsim --rfsimulator.serveraddr server | tee /opt/oai-gnb/logs/logs_gnodeb_leo.txt"
+    volumes:
+      - ../ntn/gnb.sa.band254.u0.25prb.rfsim.ntn-leo.conf:/opt/oai-gnb/etc/gnb.conf
+      # For regenerative payload use the config file below instead
+      #- ../ntn/gnb.sa.band254.u0.25prb.rfsim.ntn-leo-regen.conf:/opt/oai-gnb/etc/gnb.conf
+      - ./logs:/opt/oai-gnb/logs/
+    restart: unless-stopped
+    cap_add:
+      - SYS_NICE
+    depends_on:
+      - oai-amf
+    networks:
+      core_net:
+        ipv4_address: 192.168.70.129
+      radio_net:
+        ipv4_address: 192.168.80.129
+    labels:
+      role: "gnb"
+
+### CORE
+  mysql:
+    container_name: "mysql"
+    restart: unless-stopped
+    image: mysql:8.0
+    volumes:
+      - db-data:/var/lib/mysql
+      - ../core-network/database/oai_db.sql:/docker-entrypoint-initdb.d/oai_db.sql
+      - ../core-network/healthscripts/mysql-healthcheck.sh:/tmp/mysql-healthcheck.sh
+    environment:
+      - TZ=Europe/Paris
+      - MYSQL_DATABASE=oai_db
+      - MYSQL_USER=test
+      - MYSQL_PASSWORD=test
+      - MYSQL_ROOT_PASSWORD=linux
+    healthcheck:
+      test: /bin/bash -c "/tmp/mysql-healthcheck.sh"
+      interval: 5s
+      timeout: 2s
+      retries: 10
+    networks:
+      core_net:
+        ipv4_address: 192.168.70.131
+    labels:
+      role: "cn"
+
+  ims:
+    container_name: "ims"
+    # "latest" from 2025-08-20
+    image: oaisoftwarealliance/ims@sha256:2e775ab78383b8f1695cb4844debdcc4dcbb3541754319ba462a4d818fd33f01
+    restart: unless-stopped
+    volumes:
+      - ../core-network/conf/sip.conf:/etc/asterisk/sip.conf
+      - ../core-network/conf/users.conf:/etc/asterisk/users.conf
+    healthcheck:
+      test: /bin/bash -c "pgrep asterisk"
+      interval: 5s
+      timeout: 2s
+      retries: 10
+    networks:
+      core_net:
+        ipv4_address: 192.168.70.139
+    labels:
+      role: "cn"
+
+  oai-udr:
+    container_name: "oai-udr"
+    # "develop" from 2025-09-15
+    image: oaisoftwarealliance/oai-udr@sha256:9612b92f53f63a0b868e454556d751b9e19cede834afc53fbed86cb9ea67f9cc
+    restart: unless-stopped
+    expose:
+      - 80/tcp
+      - 8080/tcp
+    volumes:
+      - ../core-network/conf/config.yaml:/openair-udr/etc/config.yaml
+    environment:
+      - TZ=Europe/Paris
+    depends_on:
+      - mysql
+      - oai-nrf
+    networks:
+      core_net:
+        ipv4_address: 192.168.70.136
+    labels:
+      role: "cn"
+
+  oai-udm:
+    container_name: "oai-udm"
+    # "develop" from 2025-09-15
+    image: oaisoftwarealliance/oai-udm@sha256:53e96970d828299fb9d5b85ef71b44f8c4199c15bcf315edebee3aa82f1689d9
+    restart: unless-stopped
+    expose:
+      - 80/tcp
+      - 8080/tcp
+    volumes:
+      - ../core-network/conf/config.yaml:/openair-udm/etc/config.yaml
+    environment:
+      - TZ=Europe/Paris
+    depends_on:
+      - oai-udr
+    networks:
+      core_net:
+        ipv4_address: 192.168.70.137
+    labels:
+      role: "cn"
+
+  oai-ausf:
+    container_name: "oai-ausf"
+    # "develop" from 2025-09-14
+    image: oaisoftwarealliance/oai-ausf@sha256:236eee873ec61ec723164b431ddb194959c79b16029d900780562ce4164eac95
+    restart: unless-stopped
+    expose:
+      - 80/tcp
+      - 8080/tcp
+    volumes:
+      - ../core-network/conf/config.yaml:/openair-ausf/etc/config.yaml
+    environment:
+      - TZ=Europe/Paris
+    depends_on:
+      - oai-udm
+    networks:
+      core_net:
+        ipv4_address: 192.168.70.138
+    labels:
+      role: "cn"
+
+  oai-nrf:
+    container_name: "oai-nrf"
+    # "develop" from 2025-09-15
+    image: oaisoftwarealliance/oai-nrf@sha256:631c30a0dd14b234520c48b17f376c9179c4c59313d255e10de6bf00ca3c7660
+    restart: unless-stopped
+    expose:
+      - 80/tcp
+      - 8080/tcp
+    volumes:
+      - ../core-network/conf/config.yaml:/openair-nrf/etc/config.yaml
+    environment:
+      - TZ=Europe/Paris
+    networks:
+      core_net:
+        ipv4_address: 192.168.70.130
+    labels:
+      role: "cn"
+
+  oai-amf:
+    container_name: "oai-amf"
+    # "develop" from 2025-09-15
+    image: oaisoftwarealliance/oai-amf@sha256:11063f7e67dc44b9b804fb8cfe940c739abed0dfd489e39628be821bb4faa920
+    # Limit the CPU and memory resources of the AMF container for the attack
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+    restart: unless-stopped
+    expose:
+      - 80/tcp
+      - 8080/tcp
+      - 38412/sctp
+    volumes:
+      - ../core-network/conf/config.yaml:/openair-amf/etc/config.yaml
+    environment:
+      - TZ=Europe/Paris
+    depends_on:
+      - mysql
+      - oai-nrf
+      - oai-ausf
+    networks:
+      core_net:
+        ipv4_address: 192.168.70.132
+    labels:
+      role: "cn"
+
+  oai-smf:
+    container_name: "oai-smf"
+    # "develop" from 2025-11-20
+    image: oaisoftwarealliance/oai-smf@sha256:ed34280e49c179fb3d81b66ed8581764c9eb15897049fe761715ce47f87c2c30
+    restart: unless-stopped
+    expose:
+      - 80/tcp
+      - 8080/tcp
+      - 8805/udp
+    volumes:
+      - ../core-network/conf/config.yaml:/openair-smf/etc/config.yaml
+    environment:
+      - TZ=Europe/Paris
+    depends_on:
+      - oai-nrf
+      - oai-amf
+    networks:
+      core_net:
+        ipv4_address: 192.168.70.133
+    labels:
+      role: "cn"
+
+  oai-upf:
+    container_name: "oai-upf"
+    # "develop" from 2025-10-28
+    image: oaisoftwarealliance/oai-upf@sha256:51d8074d710bda988c9a1fce8c7928da4efd4938346b95d669855683518808fe
+    restart: unless-stopped
+    expose:
+      - 2152/udp
+      - 8805/udp
+    volumes:
+      - ../core-network/conf/config.yaml:/openair-upf/etc/config.yaml
+    environment:
+      - TZ=Europe/Paris
+    depends_on:
+      - oai-nrf
+      - oai-smf
+    cap_add:
+      - NET_ADMIN
+      - SYS_ADMIN
+    cap_drop:
+      - ALL
+    privileged: true
+    networks:
+      core_net:
+        ipv4_address: 192.168.70.134
+    labels:
+      role: "cn"
+
+  oai-ext-dn:
+    privileged: true
+    init: true
+    container_name: oai-ext-dn
+    # "latest" from 2025-08-21
+    image: oaisoftwarealliance/trf-gen-cn5g@sha256:f1d596c47de4571bf6fb88f738f01b801f58cf0a257c52e8e11e93b62d069f50
+    entrypoint: /bin/bash -c \
+        "ip route add 10.0.0.0/16 via 192.168.70.134 dev eth0; ip route; sleep infinity"
+    command: ["/bin/bash", "-c", "trap : SIGTERM SIGINT; sleep infinity & wait"]
+    healthcheck:
+      test: /bin/bash -c "ip r | grep 10.0.0"
+      interval: 5s
+      timeout: 2s
+      retries: 10
+    networks:
+      core_net:
+        ipv4_address: 192.168.70.135
+    labels:
+      role: "cn"
+
+### EXTRA
+  victim_ue:
+    container_name: victim_ue
+    image: oaisoftwarealliance/oai-nr-ue:2025.w45
+    entrypoint: "/bin/bash -c"
+    command:
+      # To connect the victim UE to the network on container startup, use the command below instead
+      # Note: The victim UE uses IMSI 001010000000002, because IMSI 001010000000001 is already used by the attacker UE
+      # Note: Before tag 2024.w45, use `--sa` option to specify the SA mode
+      #- "sleep 30 && /opt/oai-nr-ue/bin/nr-uesoftmodem -O /opt/oai-nr-ue/etc/ue.conf --band 254 -C 2488400000 --CO -873500000 -r 25 --numerology 0 --ssb 60 --ue-fo-compensation --rfsim --rfsimulator.prop_delay 20 --rfsimulator.options chanmod --rfsimulator.serveraddr 192.168.80.129 --time-sync-I 0.1 --ntn-initial-time-drift -46 --autonomous-ta --initial-fo 57340 --cont-fo-comp 2 --uicc0.imsi 001010000000002"
+      # To connect the victim UE to the network manually, make it a dummy container and run ./start.sh script from it
+      - tail -f
+    volumes:
+      - ../scripts/start_leo.sh:/opt/oai-nr-ue/start.sh
+      - ../ntn/nrue.uicc.ntn-leo.conf:/opt/oai-nr-ue/etc/ue.conf
+      # For regenerative payload use the config file below instead
+      #- ../ntn/nrue.uicc.ntn-leo-regen.conf:/opt/oai-nr-ue/etc/ue.conf
+    cap_add:
+      - NET_ADMIN
+      - SYS_NICE
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    restart: unless-stopped
+    networks:
+      radio_net:
+        ipv4_address: 192.168.80.127
+    depends_on:
+      - gnodeb
+    labels:
+      role: "ue"

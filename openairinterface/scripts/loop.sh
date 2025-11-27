@@ -10,7 +10,7 @@ IFS=$'\n\t'
 
 umask 077
 
-# Command line parameters for OAI UE can also be found in the gNB(-DU) logs
+# Command line parameters for OAI NR UE can also be found in the gNB(-DU) logs
 # The (commented out) options below can be used to control the log levels for different layers
 bin/nr-uesoftmodem --rfsim --rfsimulator.serveraddr 192.168.80.129 -C 3619200000 -r 106 --numerology 1 --band 78 --ssb 516 -E --ue-fo-compensation \
     --uicc0.imsi 001010000000001 \

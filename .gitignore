@@ -3,7 +3,9 @@
 *.png
 *.jpg
 *.svg
+*.txt
 
 ueransim/free5gc-compose/cert/*_*.pem
 
 *UERANSIM/
+*openairinterface5g/

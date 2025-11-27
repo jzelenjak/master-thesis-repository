@@ -10,6 +10,6 @@ IFS=$'\n\t'
 
 umask 077
 
-# Command line parameters for OAI UE can also be found in the gNB(-DU) logs
+# Command line parameters for OAI NR UE can also be found in the gNB(-DU) logs
 # NOTE: The victim UE uses IMSI 001010000000002, because IMSI 001010000000001 is already used by the attacker UE
 bin/nr-uesoftmodem --rfsim --rfsimulator.serveraddr 192.168.80.129 -C 3619200000 -r 106 --numerology 1 --band 78 --ssb 516 -E --ue-fo-compensation --uicc0.imsi 001010000000002

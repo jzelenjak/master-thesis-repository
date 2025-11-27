@@ -10,7 +10,7 @@ IFS=$'\n\t'
 
 umask 077
 
-# Command line parameters for OAI UE can also be found in the gNB(-DU) logs
+# Command line parameters for OAI NR UE can also be found in the gNB(-DU) logs
 # The (commented out) options below can be used to control the log levels for different layers
 # NOTE: We start with IMSI 001010000000004 (which will become 001010000000005 for the first Registration Request)
 #  because IMSIs 001010000000001 - 001010000000004 are registered in the network (see the ../core-network/ directory)
