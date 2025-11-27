@@ -52,7 +52,7 @@ services:
     command:
       # For normal behaviour, use the command below instead
       # Note: Before tag 2024.w45, use `--sa` option to specify the SA mode
-        #- "sleep 30 && /opt/oai-nr-ue/bin/nr-uesoftmodem --rfsim --rfsimulator.serveraddr 192.168.80.129 -C 3619200000 -r 106 --numerology 1 --band 78 --ssb 516 -E --ue-fo-compensation --uicc0.imsi 001010000000001"
+      #- "sleep 30 && /opt/oai-nr-ue/bin/nr-uesoftmodem --rfsim --rfsimulator.serveraddr 192.168.80.129 -C 3619200000 -r 106 --numerology 1 --band 78 --ssb 516 -E --ue-fo-compensation --uicc0.imsi 001010000000001"
       # For the attack, make the UE a dummy container, so that attack scripts can be launched from it
       - tail -f
     volumes:
@@ -175,8 +175,8 @@ services:
 
   ims:
     container_name: "ims"
-    # "latest" checked at 2024-10-08
-    image: oaisoftwarealliance/ims@sha256:be5682c451a6a790a76a8e49643ed567be040dc807d30fc2a0cd70afef3d12d9
+    # "latest" from 2025-08-20
+    image: oaisoftwarealliance/ims@sha256:2e775ab78383b8f1695cb4844debdcc4dcbb3541754319ba462a4d818fd33f01
     restart: unless-stopped
     volumes:
       - ../core-network/conf/sip.conf:/etc/asterisk/sip.conf
@@ -194,8 +194,8 @@ services:
 
   oai-udr:
     container_name: "oai-udr"
-    # "develop" checked at 2024-10-08
-    image: oaisoftwarealliance/oai-udr@sha256:8e3db5fbe98affc61bb37516a2f0b897768a8400f63e3882e92901bfd2d5975e
+    # "develop" from 2025-09-15
+    image: oaisoftwarealliance/oai-udr@sha256:9612b92f53f63a0b868e454556d751b9e19cede834afc53fbed86cb9ea67f9cc
     restart: unless-stopped
     expose:
       - 80/tcp
@@ -215,8 +215,8 @@ services:
 
   oai-udm:
     container_name: "oai-udm"
-    # "develop" checked at 2024-10-08
-    image: oaisoftwarealliance/oai-udm@sha256:e872cec89d8c5cc0f354d1a4688204718db33daf34dd06d711592fb40af0d07f
+    # "develop" from 2025-09-15
+    image: oaisoftwarealliance/oai-udm@sha256:53e96970d828299fb9d5b85ef71b44f8c4199c15bcf315edebee3aa82f1689d9
     restart: unless-stopped
     expose:
       - 80/tcp
@@ -235,8 +235,8 @@ services:
 
   oai-ausf:
     container_name: "oai-ausf"
-    # "develop" checked at 2024-10-08
-    image: oaisoftwarealliance/oai-ausf@sha256:6f6f910056800fd5d94e928dba3aa198786b95d5a1b6f82709184fafe79faade
+    # "develop" from 2025-09-14
+    image: oaisoftwarealliance/oai-ausf@sha256:236eee873ec61ec723164b431ddb194959c79b16029d900780562ce4164eac95
     restart: unless-stopped
     expose:
       - 80/tcp
@@ -255,8 +255,8 @@ services:
 
   oai-nrf:
     container_name: "oai-nrf"
-    # "develop" checked at 2024-10-08
-    image: oaisoftwarealliance/oai-nrf@sha256:21980bdcdb7308ccb78e20709c87fef4f2d9a02fcb036765a10753e5d9e5e734
+    # "develop" from 2025-09-15
+    image: oaisoftwarealliance/oai-nrf@sha256:631c30a0dd14b234520c48b17f376c9179c4c59313d255e10de6bf00ca3c7660
     restart: unless-stopped
     expose:
       - 80/tcp
@@ -273,8 +273,8 @@ services:
 
   oai-amf:
     container_name: "oai-amf"
-    # "develop" checked at 2024-10-08
-    image: oaisoftwarealliance/oai-amf@sha256:c1391e33bfa398fb284a9fef467f0c0e46fbe1e1f8a38a6f04e0164d13a226e8
+    # "develop" from 2025-09-15
+    image: oaisoftwarealliance/oai-amf@sha256:11063f7e67dc44b9b804fb8cfe940c739abed0dfd489e39628be821bb4faa920
     # Limit the CPU and memory resources of the AMF container for the attack
     deploy:
       resources:
@@ -302,8 +302,8 @@ services:
 
   oai-smf:
     container_name: "oai-smf"
-    # "develop" checked at 2024-10-08
-    image: oaisoftwarealliance/oai-smf@sha256:46f8054a0ca4aaed72e8b8f6c77a6ca5a10ad95972490af4b5de5fa1a47abe15
+    # "develop" from 2025-11-20
+    image: oaisoftwarealliance/oai-smf@sha256:ed34280e49c179fb3d81b66ed8581764c9eb15897049fe761715ce47f87c2c30
     restart: unless-stopped
     expose:
       - 80/tcp
@@ -324,8 +324,8 @@ services:
 
   oai-upf:
     container_name: "oai-upf"
-    # "develop" checked at 2024-10-08
-    image: oaisoftwarealliance/oai-upf@sha256:f8e283bc310b4604bb395ddc8aec2ad38a654621866f0edf6147cc1aa3a47909
+    # "develop" from 2025-10-28
+    image: oaisoftwarealliance/oai-upf@sha256:51d8074d710bda988c9a1fce8c7928da4efd4938346b95d669855683518808fe
     restart: unless-stopped
     expose:
       - 2152/udp
@@ -353,8 +353,8 @@ services:
     privileged: true
     init: true
     container_name: oai-ext-dn
-    # "jammy" checked at 2024-10-08
-    image: oaisoftwarealliance/trf-gen-cn5g@sha256:2c5f33b0c16b5a4451dd2e40a6e83f970aa50eee390ea4f249a993ee74dde9b3
+    # "latest" from 2025-08-21
+    image: oaisoftwarealliance/trf-gen-cn5g@sha256:f1d596c47de4571bf6fb88f738f01b801f58cf0a257c52e8e11e93b62d069f50
     entrypoint: /bin/bash -c \
         "ip route add 10.0.0.0/16 via 192.168.70.134 dev eth0; ip route; sleep infinity"
     command: ["/bin/bash", "-c", "trap : SIGTERM SIGINT; sleep infinity & wait"]
@@ -378,7 +378,7 @@ services:
       # To connect the victim UE to the network on container startup, use the command below instead
       # Note: The victim UE uses IMSI 001010000000002, because IMSI 001010000000001 is already used by the attacker UE
       # Note: Before tag 2024.w45, use `--sa` option to specify the SA mode
-        #- "sleep 30 && /opt/oai-nr-ue/bin/nr-uesoftmodem --rfsim --rfsimulator.serveraddr 192.168.80.129 -C 3619200000 -r 106 --numerology 1 --band 78 --ssb 516 -E --ue-fo-compensation --uicc0.imsi 001010000000002"
+      #- "sleep 30 && /opt/oai-nr-ue/bin/nr-uesoftmodem --rfsim --rfsimulator.serveraddr 192.168.80.129 -C 3619200000 -r 106 --numerology 1 --band 78 --ssb 516 -E --ue-fo-compensation --uicc0.imsi 001010000000002"
       # To connect the victim UE to the network manually, make it a dummy container and run ./start.sh script from it
       - tail -f
     volumes:

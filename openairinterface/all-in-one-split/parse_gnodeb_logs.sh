@@ -1,1 +1,0 @@
-../utils/parse_gnodeb_logs.sh
