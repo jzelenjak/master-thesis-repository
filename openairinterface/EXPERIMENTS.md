@@ -41,6 +41,8 @@ The gNB (or gNB-DU and gNB-CU) logs for the UE connections will be automatically
 
 *Note: In all the steps below, we use `exp1` for different file names to illustrate the usage. For Experiment 2, you should obviously use `exp2` instead.*
 
+*Note: The same scripts can also be used for NTN experiments. Use the corresponding names for the output files, e.g. `stats_full_geo_exp1.csv` or `connections_gnodeb_split_leo_exp2.csv` etc.*
+
 ### Generating resource utilization statistics
 
 For each of the two experiments, perform the following steps:
@@ -132,6 +134,13 @@ This is needed to align the elapsed seconds on the X-axis with the resource util
 If you don't specify `--start-time` or `--start-times`, then the first timestamp in the provided csv file(s) with the connections will be used.
 
 ### UE connections over time (based on UE logs)
+
+*Note: The UE increments the number of established RRC connections after it has processed the RRCSetup message from the gNB and sent RRCSetupComplete + Registration Request to the lower layers for transmission (this is when the UE transitions to the RRC\_CONNECTED state).*
+*The iteration (the number of RA restarts) is incremented when the UE receives a DLInformationTransfer or an RRCReject.*
+*Both counts are logged when the UE receives a DLInformationTransfer or an RRCReject.*
+*This is not ideal, and sometimes the plots don't match between the gNB and the UE if the UE established an RRC connection, but had to restart RA before receiving these messages (e.g. due to SR transmission failures).*
+*This should not happen with OAI TN RF simulation, but can happen when running OAI on real USRP devices or when using OAI NTN GEO RF simulation.*
+*Therefore, the logs printed by the gNB (and the corresponding plots) are more reliable.*
 
 To plot the number of established RRC connections and the number of Random Access procedure restarts by the UE over time, follow these steps:
 

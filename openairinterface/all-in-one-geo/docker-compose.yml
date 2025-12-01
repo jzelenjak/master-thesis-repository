@@ -72,7 +72,8 @@ services:
     # Important: Before tag 2024.w45, use `--sa` option to specify the SA mode (for later versions, do *not* use --sa)
     #image: oai-gnodeb-local:2024.w40
     # For the attack, use the image built from the fork at https://github.com/jzelenjak/openairinterface5g
-    image: rogue-oai-gnodeb
+    # NOTE: If using the provided configuration file, make sure to compile the gNB with MAX_MOBILES_PER_GNB set to 16
+    image: rogue-oai-gnodeb-ntn
     # Limit the CPU and memory resources of the gNB container for the attack
     deploy:
       resources:

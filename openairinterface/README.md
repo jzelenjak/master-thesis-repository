@@ -55,6 +55,16 @@ Use standard Docker (Compose) commands to deploy the stack.
 The Core Network MySQL database is stored in a Docker volume in order to survive to multiple re-deploy. To reset the configuration, remove the volume. Refer to the Docker documentation about volumes.
 
 
+## NTN configuration
+
+This repository already contains the configuration files for the OAI NTN setup. The configuration is based on the official tutorial from OpenAirInterface, which is available at
+<https://gitlab.eurecom.fr/oai/openairinterface5g/-/blob/develop/doc/RUNMODEM.md#how-to-run-a-ntn-configuration>.
+For more information refer to their page.
+
+*NB! If you use the provided configuration files, make sure to compile the gNB with MAX_MOBILES_PER_GNB set to 16.*
+*You can name the corresponding image for the gNB "rogue-oai-gnodeb-ntn".*
+
+
 ## Known issues
 
 ### gNodeB/UE delays / not connecting

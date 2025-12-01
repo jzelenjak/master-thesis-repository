@@ -81,10 +81,11 @@ services:
     #image: oaisoftwarealliance/oai-gnb:2025.w45
     # If you use the Dockerfile in the gnodeb/ directory, use the following image instead (update the tag if needed)
     # Important: Before tag 2024.w45, use `--sa` option to specify the SA mode (for later versions, do *not* use --sa)
-    # You might also have use different gNB-DU configuration files (see the README in the gnodeb/ directory)
+    # You might also have to use different gNB-DU configuration files (see the README in the gnodeb/ directory)
     #image: oai-gnodeb-local:2024.w40
     # For the attack, use the image built from the fork at https://github.com/jzelenjak/openairinterface5g
-    image: rogue-oai-gnodeb
+    # NOTE: If using the provided configuration file, make sure to compile the gNB with MAX_MOBILES_PER_GNB set to 16
+    image: rogue-oai-gnodeb-ntn
     # Limit the CPU and memory resources of the gNB-DU container for the attack
     deploy:
       resources:
@@ -118,10 +119,11 @@ services:
     #image: oaisoftwarealliance/oai-gnb:2025.w45
     # If you use the Dockerfile in the gnodeb/ directory, use the following image instead (update the tag if needed)
     # Important: Before tag 2024.w45, use `--sa` option to specify the SA mode (for later versions, do *not* use --sa)
-    # You might also have use different gNB-CU configuration files (see the README in the gnodeb/ directory)
+    # You might also have to use different gNB-CU configuration files (see the README in the gnodeb/ directory)
     #image: oai-gnodeb-local:2024.w40
     # For the attack, use the image built from the fork at https://github.com/jzelenjak/openairinterface5g
-    image: rogue-oai-gnodeb
+    # NOTE: If using the provided configuration file, make sure to compile the gNB with MAX_MOBILES_PER_GNB set to 16
+    image: rogue-oai-gnodeb-ntn
     # Limit the CPU and memory resources of the gNB-CU container for the attack
     deploy:
       resources:
@@ -132,7 +134,7 @@ services:
     command:
       - "sleep 15 && /opt/oai-gnb/bin/nr-softmodem -O /opt/oai-gnb/etc/gnb.conf | tee /opt/oai-gnb/logs/logs_gnodeb_cu_geo.txt"
     volumes:
-      - ../gnodeb/conf/gnb-cu.sa.f1.conf:/opt/oai-gnb/etc/gnb.conf
+      - ../ntn/gnb-cu.sa.f1.conf:/opt/oai-gnb/etc/gnb.conf
       - ./logs:/opt/oai-gnb/logs/
     restart: unless-stopped
     cap_add:

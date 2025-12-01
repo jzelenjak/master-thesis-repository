@@ -80,7 +80,7 @@ services:
     #image: oaisoftwarealliance/oai-gnb:2025.w45
     # If you use the Dockerfile in the gnodeb/ directory, use the following image instead (update the tag if needed)
     # Important: Before tag 2024.w45, use `--sa` option to specify the SA mode (for later versions, do *not* use --sa)
-    # You might also have use different gNB-DU configuration files (see the README in the gnodeb/ directory)
+    # You might also have to use different gNB-DU configuration files (see the README in the gnodeb/ directory)
     #image: oai-gnodeb-local:2024.w40
     # For the attack, use the image built from the fork at https://github.com/jzelenjak/openairinterface5g
     image: rogue-oai-gnodeb
@@ -117,7 +117,7 @@ services:
     #image: oaisoftwarealliance/oai-gnb:2025.w45
     # If you use the Dockerfile in the gnodeb/ directory, use the following image instead (update the tag if needed)
     # Important: Before tag 2024.w45, use `--sa` option to specify the SA mode (for later versions, do *not* use --sa)
-    # You might also have use different gNB-CU configuration files (see the README in the gnodeb/ directory)
+    # You might also have to use different gNB-CU configuration files (see the README in the gnodeb/ directory)
     #image: oai-gnodeb-local:2024.w40
     # For the attack, use the image built from the fork at https://github.com/jzelenjak/openairinterface5g
     image: rogue-oai-gnodeb

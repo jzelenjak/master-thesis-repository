@@ -51,8 +51,6 @@ services:
       #- ../ntn/ue.conf:/opt/oai-nr-ue/etc/ue.conf
       #- ../ntn/channelmod_rfsimu_LEO_satellite.conf:/opt/oai-nr-ue/etc/channelmod_rfsimu_LEO_satellite.conf
       - ../ntn/nrue.uicc.ntn-leo.conf:/opt/oai-nr-ue/etc/ue.conf
-      # For regenerative payload use the config file below instead
-      #- ../ntn/nrue.uicc.ntn-leo-regen.conf:/opt/oai-nr-ue/etc/ue.conf
       - ./logs:/opt/oai-nr-ue/logs/
     cap_add:
       - NET_ADMIN
@@ -77,7 +75,8 @@ services:
     # Important: Before tag 2024.w45, use `--sa` option to specify the SA mode (for later versions, do *not* use --sa)
     #image: oai-gnodeb-local:2024.w40
     # For the attack, use the image built from the fork at https://github.com/jzelenjak/openairinterface5g
-    image: rogue-oai-gnodeb
+    # NOTE: If using the provided configuration file, make sure to compile the gNB with MAX_MOBILES_PER_GNB set to 16
+    image: rogue-oai-gnodeb-ntn
     # Limit the CPU and memory resources of the gNB container for the attack
     deploy:
       resources:
@@ -89,8 +88,6 @@ services:
       - "sleep 15 && /opt/oai-gnb/bin/nr-softmodem -O /opt/oai-gnb/etc/gnb.conf --rfsim --rfsimulator.serveraddr server | tee /opt/oai-gnb/logs/logs_gnodeb_leo.txt"
     volumes:
       - ../ntn/gnb.sa.band254.u0.25prb.rfsim.ntn-leo.conf:/opt/oai-gnb/etc/gnb.conf
-      # For regenerative payload use the config file below instead
-      #- ../ntn/gnb.sa.band254.u0.25prb.rfsim.ntn-leo-regen.conf:/opt/oai-gnb/etc/gnb.conf
       - ./logs:/opt/oai-gnb/logs/
     restart: unless-stopped
     cap_add:
@@ -342,8 +339,6 @@ services:
     volumes:
       - ../scripts/start_leo.sh:/opt/oai-nr-ue/start.sh
       - ../ntn/nrue.uicc.ntn-leo.conf:/opt/oai-nr-ue/etc/ue.conf
-      # For regenerative payload use the config file below instead
-      #- ../ntn/nrue.uicc.ntn-leo-regen.conf:/opt/oai-nr-ue/etc/ue.conf
     cap_add:
       - NET_ADMIN
       - SYS_NICE
