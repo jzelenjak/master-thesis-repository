@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 #
-# This script plots the number of UE RRC connections in the gNB over time:
+# This script plots the number of UE RRC connections in the gNB over time, as logged by the UE:
 # - The number of established RRC connections (incremented when the UE is done processing RRCSetup and sends RRCSetupComplete + NAS Registration Request to the lower layers)
 # - The number of iterations/restarts (incremented when the UE restarts the RA procedure in the RRC layer, i.e. when receiving RRCReject or DLInformationTransfer)
 # The script can be used to plot the UE RRC connections for one or multiple experiments (based on the number of files that are provided).
 #   Note that at most two experiments are currently supported, but this can be changed by modifying the relevant parts of the code.
+# Note that the logs printed by the gNB (and the corresponding plots) are more reliable to estimate the number of established RRC connections at the gNB.
 # In order to get the csv file with the UE RRC connections, run the script parse_ue_logs.sh.
 
 import argparse
@@ -101,8 +102,8 @@ for i, exp_file_name in enumerate(INPUT_FILES):
 # INFO: Define some values for the metrics that will be plotted
 # NOTE: "color" is only used when a single experiment file has been provided
 stats = {
-    "total_restarts": { "title": "Random Access procedure restarts in the RRC layer", "color": "red", "unit": "Number of restarts" },
     "established_connections": { "title": "Established RRC connections", "color": "blue", "unit": "Number of connections" },
+    "total_restarts": { "title": "Random Access procedure restarts triggered by the RRC layer", "color": "red", "unit": "Number of restarts" },
 }
 
 # NOTE: These values will be used if multiple experiment files have been provided

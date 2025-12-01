@@ -138,15 +138,23 @@ for protocol_name in protocols:
                     protocol[m].insert(0, 0)
                     protocol[m].insert(1, 0)
             color = stats[metric]["color"] if len(experiments) == 1 else exp_colors[index]
-            ax.plot(protocol["elapsed_seconds"], protocol[metric], color=color, marker='o', markersize=MARKER_SIZE, \
+            # INFO: If the time period is short, add circles for markers and make the dashes bigger
+            # NOTE: Feel free to use a different number for the threshold
+            if max_elapsed_seconds <= 300:
+                ax.plot(protocol["elapsed_seconds"], protocol[metric], color=color, marker='o', markersize=MARKER_SIZE, \
                     linestyle="dashed", dashes=(3 + index, 2), linewidth=LINE_WIDTH, alpha=LINE_ALPHA, label=f"Experiment {index + 1} ({exp_labels[index]})")
+            else:
+                ax.plot(protocol["elapsed_seconds"], protocol[metric], color=color, linestyle="dashed", dashes=(0.75 + index * 0.25, 0.75), \
+                    linewidth=LINE_WIDTH, alpha=LINE_ALPHA, label=f"Experiment {index + 1} ({exp_labels[index]})")
 
         # INFO: Plot the start of the attack
         if ATTACK_START > 0:
             ax.axvline(x=ATTACK_START, color="grey", linestyle="dashed", dashes=(2, 2), linewidth=LINE_WIDTH + 1, alpha=LINE_ALPHA, label="Attack start")
 
         ax.set_xlabel("Elapsed seconds", fontsize=FONT_SIZE_TEXT)
-        ax.xaxis.set_ticks(range(0, max_elapsed_seconds + 4, 5))
+        # NOTE: Feel free to use a different number for the threshold
+        step_size = 5 if max_elapsed_seconds <= 300 else 50
+        ax.xaxis.set_ticks(range(0, max_elapsed_seconds + 4, step_size))
         ax.set_xlim(left=0, right=max_elapsed_seconds + 1)
 
         ax.set_ylabel(stats[metric]["unit"], fontsize=FONT_SIZE_TEXT)

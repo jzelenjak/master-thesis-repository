@@ -14,9 +14,9 @@ from termcolor import colored
 # INFO: The number of CPU cores allocated to containers cannot be obtained from the docker stats output
 # For this reason, we hardcode them here, so that they can be used for Y-axis scaling
 # INFO: These are the values for UERANSIM experiments
-CPU_CORES = { "ue": 15.0, "gnodeb": 2.0, "amf": 1.0 }
+# CPU_CORES = { "ue": 15.0, "gnodeb": 2.0, "amf": 1.0 }
 # INFO: These are the values for OAI experiments
-# CPU_CORES = { "ue": 15.0, "gnodeb": 3.0, "gnodeb-du": 3.0, "gnodeb-cu": 1.0, "oai-amf": 1.0 }
+CPU_CORES = { "ue": 15.0, "gnodeb": 3.0, "gnodeb-du": 3.0, "gnodeb-cu": 1.0, "oai-amf": 1.0 }
 
 # The names to be used in plot titles
 CONTAINER_NAMES = { "gnodeb": "gNB", "gnodeb-du": "gNB-DU", "gnodeb-cu": "gNB-CU", "amf": "AMF", "ue": "UE", "oai-amf": "AMF" }
@@ -36,6 +36,7 @@ LINE_WIDTH = 4
 LINE_ALPHA = 0.6
 
 # Elapsed seconds before the attack started
+# Must be > 0, otherwise the line will not be drawn
 ATTACK_START = 10
 
 # A helper function to parse and convert memory usage into the specified unit
@@ -95,7 +96,7 @@ for i, exp_file_name in enumerate(sys.argv[1:]):
     experiments.append(containers)
 
 # INFO: Perform some friendly consistency checks
-for i in range(len((experiments))):
+for i in range(len(experiments)):
     assert len(experiments[i]) == len(experiments[0]), f"Experiment {i+1} has a different number of containers than Experiment 1"
     for container_name in experiments[i]:
         assert experiments[i][container_name]["mem_limit"] == experiments[0][container_name]["mem_limit"], f"Experiment {i+1} has a different mem_limit than Experiment 1"
@@ -125,7 +126,7 @@ containers = experiments[0]
 # INFO: One plot is generated for each container
 for container_name in containers:
     # INFO: Memory limit can be taken from the stats file
-    stats["mem_usage"]["max_value"] = containers[container_name]["mem_limit"] 
+    stats["mem_usage"]["max_value"] = containers[container_name]["mem_limit"]
     # INFO: Specify the number of allocated CPU cores to adjust the Y-axis
     stats["cpu_perc"]["max_value"] = 100 * CPU_CORES[container_name]
 
@@ -135,19 +136,28 @@ for container_name in containers:
         ax = axes[i]
         max_elapsed_seconds = 60
 
-        # INFO: Plot the metric for each experiment 
+        # INFO: Plot the metric for each experiment
         for index in range(len(experiments)):
             container = experiments[index][container_name]
             max_elapsed_seconds = max(max_elapsed_seconds, container["elapsed_seconds"][-1])
             color = stats[metric]["color"] if len(experiments) == 1 else exp_colors[index]
-            ax.plot(container["elapsed_seconds"], container[metric], color=color, marker='o', markersize=MARKER_SIZE, \
+            # INFO: If the time period is short, add circles for markers and make the dashes bigger
+            # NOTE: Feel free to use a different number for the threshold
+            if max_elapsed_seconds <= 300:
+                ax.plot(container["elapsed_seconds"], container[metric], color=color, marker='o', markersize=MARKER_SIZE, \
                     linestyle="dashed", dashes=(3 + index, 2), linewidth=LINE_WIDTH, alpha=LINE_ALPHA, label=f"Experiment {index + 1} ({exp_labels[index]})")
+            else:
+                ax.plot(container["elapsed_seconds"], container[metric], color=color, linestyle="dashed", dashes=(0.75 + index * 0.25, 0.75), \
+                    linewidth=LINE_WIDTH, alpha=LINE_ALPHA, label=f"Experiment {index + 1} ({exp_labels[index]})")
 
-        # INFO: Plot the start of the attack to give an indication of the baseline
-        ax.axvline(x=ATTACK_START, color="grey", linestyle="dashed", dashes=(2, 2), linewidth=LINE_WIDTH + 1, alpha=LINE_ALPHA, label="Attack start")
+        # INFO: Plot the start of the attack (to give an indication of the baseline)
+        if ATTACK_START > 0:
+            ax.axvline(x=ATTACK_START, color="grey", linestyle="dashed", dashes=(2, 2), linewidth=LINE_WIDTH + 1, alpha=LINE_ALPHA, label="Attack start")
 
         ax.set_xlabel("Elapsed seconds", fontsize=FONT_SIZE_TEXT)
-        ax.xaxis.set_ticks(range(0, max_elapsed_seconds + 4, 5))
+        # NOTE: Feel free to use a different number for the threshold
+        step_size = 5 if max_elapsed_seconds <= 300 else 50
+        ax.xaxis.set_ticks(range(0, max_elapsed_seconds + 4, step_size))
         ax.set_xlim(left=0, right=max_elapsed_seconds + 1)
 
         ax.set_ylabel(stats[metric]["unit"], fontsize=FONT_SIZE_TEXT)
