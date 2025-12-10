@@ -49,6 +49,8 @@ Note: If your machine does not support the AVX-512 instruction set, you can comp
 
 Use standard Docker (Compose) commands to deploy the stack.
 
+For a step-by-step guide on how to run the experiments, see [EXPERIMENTS.md](./EXPERIMENTS.md).
+
 
 ## Data storage (core network)
 
